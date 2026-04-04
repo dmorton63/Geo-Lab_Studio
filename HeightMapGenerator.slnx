@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="HeightMapGenerator.vcxproj" Id="97b84901-4b6d-4353-9ada-61849a71e836" />
+</Solution>

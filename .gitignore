@@ -1,0 +1,53 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+*.vcxproj.user
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+*.log
+*.tlog
+*.ilk
+*.pdb
+*.pch
+*.exe
+*.dll
+*.lib
+*.obj
+*.iobj
+*.ipdb
+*.idb
+
+# Build results
+[Bb]uild/
+[Ll]ib/
+_[Bb]uild/
+
+# vcpkg
+vcpkg_installed/
+packages/
+
+# GLAD (if you want to exclude it)
+# glad.c is small enough to commit, but you can uncomment if needed
+# glad.c
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Debug dumps
+*.txt
+!TODO.md
+!PATH_CONFIG.md
+!README.md
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
