@@ -8,6 +8,7 @@
 #include "ErosionSimulator.h"
 #include "DataDumper.h"
 #include "Framebuffer.h"
+#include "EngineScalingHelper.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -124,7 +125,19 @@ Image generateHeightmap(const LandscapeParameters& params) {
                 heightmap(x, y) = value;
             });
     }
-    
+
+    return heightmap;
+}
+
+Image generateFlatTerrain(size_t resolution, float height = 0.5f) {
+    Image heightmap(resolution, resolution);
+
+    for (size_t y = 0; y < heightmap.height(); ++y) {
+        for (size_t x = 0; x < heightmap.width(); ++x) {
+            heightmap(x, y) = height;
+        }
+    }
+
     return heightmap;
 }
 
@@ -440,6 +453,10 @@ int main() {
             if (params.paintMode) {
                 // Entering paint mode - upload raw heightmap directly
                 std::cout << "Entering paint mode - displaying raw heightmap" << std::endl;
+
+                // Enable auto-contrast to prevent dark display
+                params.autoContrastDisplay = true;
+
                 renderer.uploadTexture(rawHeight);
 
                 // Update design to match current raw height (for analysis layers)
@@ -497,15 +514,161 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        // === GLOBAL MENU BAR ===
+        float menuBarHeight = 0.0f;
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("New Project...", "Ctrl+N")) {
+                    params.showNewProjectDialog = true;
+                }
+                if (ImGui::MenuItem("Import Heightmap...", "Ctrl+O")) {
+                    // TODO: Phase 2.1 - Heightmap Import
+                }
+                if (ImGui::MenuItem("Export Heightmap...", "Ctrl+S")) {
+                    // TODO: Export functionality
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Exit", "Alt+F4")) {
+                    glfwSetWindowShouldClose(window, GLFW_TRUE);
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Edit")) {
+                bool canUndo = !undoStack.empty();
+                bool canRedo = !redoStack.empty();
+                if (ImGui::MenuItem("Undo", "Ctrl+Z", false, canUndo)) {
+                    if (canUndo) {
+                        redoStack.push_back(rawHeight);
+                        if (redoStack.size() > maxUndoLevels) {
+                            redoStack.erase(redoStack.begin());
+                        }
+                        rawHeight = undoStack.back();
+                        undoStack.pop_back();
+                        design = LandscapeDesigner::designLandscape(rawHeight, params);
+                        renderer.uploadTexture(design.height);
+                        if (params.view3D) {
+                            renderer.updateTerrainMesh(design.height, params.heightScale);
+                        }
+                    }
+                }
+                if (ImGui::MenuItem("Redo", "Ctrl+Y", false, canRedo)) {
+                    if (canRedo) {
+                        undoStack.push_back(rawHeight);
+                        if (undoStack.size() > maxUndoLevels) {
+                            undoStack.erase(undoStack.begin());
+                        }
+                        rawHeight = redoStack.back();
+                        redoStack.pop_back();
+                        design = LandscapeDesigner::designLandscape(rawHeight, params);
+                        renderer.uploadTexture(design.height);
+                        if (params.view3D) {
+                            renderer.updateTerrainMesh(design.height, params.heightScale);
+                        }
+                    }
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Reset Camera", "Home")) {
+                    camera = Camera();  // Reset to default
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("View")) {
+                ImGui::MenuItem("3D Preview", nullptr, &params.view3D);
+                ImGui::MenuItem("Auto-Contrast Display", nullptr, &params.autoContrastDisplay);
+                ImGui::Separator();
+                if (ImGui::BeginMenu("Preview Mode")) {
+                    bool isHeight = params.previewMode == 0;
+                    bool isSlope = params.previewMode == 1;
+                    bool isCurvature = params.previewMode == 2;
+                    bool isBiome = params.previewMode == 3;
+                    bool isWater = params.previewMode == 4;
+                    if (ImGui::MenuItem("Height", nullptr, isHeight)) params.previewMode = 0;
+                    if (ImGui::MenuItem("Slope", nullptr, isSlope)) params.previewMode = 1;
+                    if (ImGui::MenuItem("Curvature", nullptr, isCurvature)) params.previewMode = 2;
+                    if (ImGui::MenuItem("Biome Mask", nullptr, isBiome)) params.previewMode = 3;
+                    if (ImGui::MenuItem("Water Mask", nullptr, isWater)) params.previewMode = 4;
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Tools")) {
+                if (ImGui::MenuItem("Apply Erosion")) {
+                    params.erosionMode = true;
+                }
+                if (ImGui::MenuItem("Normalize Terrain to Range")) {
+                    params.normalizeTerrainToRange = true;
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Help")) {
+                if (ImGui::MenuItem("About")) {
+                    // TODO: Show about dialog
+                }
+                ImGui::EndMenu();
+            }
+            menuBarHeight = ImGui::GetWindowSize().y;
+            ImGui::EndMainMenuBar();
+        }
+
+        // === MODE TOOLBAR ===
+        float modeToolbarHeight = 0.0f;
+        ImGui::SetNextWindowPos(ImVec2(0, menuBarHeight), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(static_cast<float>(displayW), 50), ImGuiCond_Always);
+        ImGui::Begin("Mode Toolbar", nullptr, 
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+
+        ImGui::Text("Mode:");
+        ImGui::SameLine();
+
+        // Mode buttons with visual feedback
+        if (ImGui::Button("Select", ImVec2(100, 30))) {
+            params.currentMode = EditorMode::Select;
+            params.paintMode = false;
+        }
+        if (params.currentMode == EditorMode::Select) {
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "<");
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Paint", ImVec2(100, 30))) {
+            params.currentMode = EditorMode::Paint;
+            params.paintMode = true;
+        }
+        if (params.currentMode == EditorMode::Paint) {
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "<");
+        }
+
+        ImGui::SameLine();
+        ImGui::BeginDisabled();  // Future modes - disabled for now
+        if (ImGui::Button("Sculpt", ImVec2(100, 30))) {
+            params.currentMode = EditorMode::Sculpt;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Ramp", ImVec2(100, 30))) {
+            params.currentMode = EditorMode::Ramp;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Smooth", ImVec2(100, 30))) {
+            params.currentMode = EditorMode::Smooth;
+        }
+        ImGui::EndDisabled();
+
+        modeToolbarHeight = ImGui::GetWindowSize().y;
+        ImGui::End();
+
         // === 3-PANEL LAYOUT SYSTEM ===
 
-        // Calculate layout sizes (responsive to window size)
-        const float toolsPanelWidth = 420.0f;  // Increased from 350px to fit all controls comfortably
+        // Calculate layout sizes (responsive to window size, accounting for menu bar + toolbar)
+        const float toolsPanelWidth = 420.0f;
         const float viewportPadding = 10.0f;
+        const float uiTopOffset = menuBarHeight + modeToolbarHeight;
 
         float remainingWidth = static_cast<float>(displayW) - toolsPanelWidth - (viewportPadding * 4);
-        int viewportWidth = static_cast<int>(remainingWidth / 2.0f);  // Split remaining space equally
-        int viewportHeight = displayH - static_cast<int>(viewportPadding * 2);
+        int viewportWidth = static_cast<int>(remainingWidth / 2.0f);
+        int viewportHeight = displayH - static_cast<int>(viewportPadding * 2) - static_cast<int>(uiTopOffset);
 
         // Resize framebuffers if window size changed
         if (fbo2D.getWidth() != viewportWidth || fbo2D.getHeight() != viewportHeight) {
@@ -539,10 +702,11 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // === TOOLS PANEL (Left Side, Always Visible) ===
-        ImGui::SetNextWindowPos(ImVec2(viewportPadding, viewportPadding), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(viewportPadding, uiTopOffset + viewportPadding), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(toolsPanelWidth, static_cast<float>(viewportHeight)), ImGuiCond_Always);
         ImGui::Begin("Tools & Parameters", nullptr,
-                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         UIPanel::render(params, &design, &camera);
 
@@ -550,7 +714,7 @@ int main() {
 
         // === 2D PAINT VIEW WINDOW (Center) ===
         float view2DX = toolsPanelWidth + viewportPadding * 2;
-        ImGui::SetNextWindowPos(ImVec2(view2DX, viewportPadding), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(view2DX, uiTopOffset + viewportPadding), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(static_cast<float>(viewportWidth), static_cast<float>(viewportHeight)), ImGuiCond_Always);
         ImGui::Begin("2D Paint View", nullptr, 
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
@@ -654,7 +818,7 @@ int main() {
 
         // === 3D PREVIEW WINDOW (Right Side) ===
         float view3DX = view2DX + static_cast<float>(viewportWidth) + viewportPadding;
-        ImGui::SetNextWindowPos(ImVec2(view3DX, viewportPadding), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(view3DX, uiTopOffset + viewportPadding), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(static_cast<float>(viewportWidth), static_cast<float>(viewportHeight)), ImGuiCond_Always);
         ImGui::Begin("3D Preview", nullptr,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
@@ -702,6 +866,119 @@ int main() {
         }
 
         ImGui::End();
+
+        // === NEW PROJECT DIALOG ===
+        if (params.showNewProjectDialog) {
+            ImGui::OpenPopup("New Project");
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        }
+
+        if (ImGui::BeginPopupModal("New Project", &params.showNewProjectDialog, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Create New Terrain Project");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // Engine Selection
+            ImGui::Text("Target Engine:");
+            const char* engines[] = { "Unreal Engine", "Unity", "Godot", "Custom" };
+            int currentEngine = static_cast<int>(params.targetEngine);
+            if (ImGui::Combo("##Engine", &currentEngine, engines, 4)) {
+                params.targetEngine = static_cast<TargetEngine>(currentEngine);
+            }
+            ImGui::Spacing();
+
+            // Terrain Type Selection (affects scale calculation)
+            ImGui::Text("Terrain Type:");
+            const char* terrainTypes[] = { "Plains", "Hills", "Mountains", "Coastal", "Custom" };
+            int currentTerrainType = static_cast<int>(params.terrainType);
+            if (ImGui::Combo("##TerrainType", &currentTerrainType, terrainTypes, 5)) {
+                params.terrainType = static_cast<TerrainType>(currentTerrainType);
+            }
+            ImGui::Spacing();
+
+            // Terrain Size
+            ImGui::Text("Terrain World Size:");
+            const char* sizes[] = { "512m", "1km", "2km", "4km", "8km" };
+            static int sizeIndex = 1;  // Default 1km
+            if (ImGui::Combo("##Size", &sizeIndex, sizes, 5)) {
+                float sizeValues[] = { 512.0f, 1000.0f, 2000.0f, 4000.0f, 8000.0f };
+                params.terrainWorldSize = sizeValues[sizeIndex];
+            }
+            ImGui::Spacing();
+
+            // Starting Template
+            ImGui::Text("Starting Template:");
+            const char* templates[] = { "Perlin Noise (Procedural)", "Flat (Sculpt from Scratch)" };
+            int currentTemplate = static_cast<int>(params.startingTemplate);
+            ImGui::Combo("##Template", &currentTemplate, templates, 2);
+            params.startingTemplate = static_cast<StartingTemplate>(currentTemplate);
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // Info text
+            ImGui::TextWrapped("This will set up your project with engine-appropriate height ranges and generate the initial terrain.");
+
+            ImGui::Spacing();
+
+            // Buttons
+            if (ImGui::Button("Create Project", ImVec2(120, 0))) {
+                // Enable engine presets
+                params.useEnginePresets = true;
+
+                // Calculate appropriate height range based on engine and terrain type
+                auto range = EngineScalingHelper::calculateClampRange(params);
+                params.minHeight = range.first;
+                params.maxHeight = range.second;
+                params.enableHeightClamping = true;
+
+                // Generate terrain based on template
+                switch (params.startingTemplate) {
+                    case StartingTemplate::PerlinNoise:
+                        // Use existing Perlin generation (will happen automatically via needsUpdate)
+                        params.markChanged();
+                        break;
+
+                    case StartingTemplate::FlatSculptable:
+                        // Generate flat terrain at mid-height
+                        rawHeight = generateFlatTerrain(params.mapResolution, 0.5f);
+                        design = LandscapeDesigner::designLandscape(rawHeight, params);
+                        renderer.uploadTexture(design.height);
+                        if (params.view3D) {
+                            renderer.updateTerrainMesh(design.height, params.heightScale);
+                        }
+                        break;
+                }
+
+                // Clear undo/redo stacks for fresh project
+                undoStack.clear();
+                redoStack.clear();
+
+                // Reset to Select mode
+                params.currentMode = EditorMode::Select;
+                params.paintMode = false;
+
+                std::cout << "New project created!" << std::endl;
+                std::cout << "  Engine: " << engines[static_cast<int>(params.targetEngine)] << std::endl;
+                std::cout << "  Terrain Type: " << terrainTypes[static_cast<int>(params.terrainType)] << std::endl;
+                std::cout << "  Size: " << params.terrainWorldSize << "m" << std::endl;
+                std::cout << "  Height Range: " << params.minHeight << " - " << params.maxHeight << std::endl;
+
+                params.showNewProjectDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                params.showNewProjectDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
 
         ImGui::Render();
 

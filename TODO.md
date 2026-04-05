@@ -125,6 +125,92 @@
 - [ ] Brush jitter/scatter
 - [ ] Invert mode (Shift+Click)
 
+### **3.2.5 Modal Mouse Wheel System (Paint Mode Focus)** 🎯
+*Priority: High - Professional workflow enhancement*
+
+**Concept:** Mouse wheel function changes based on active mode, selected via keyboard shortcuts or mouse button cycling. One input method controls multiple parameters efficiently.
+
+**Key Innovation:** Instead of hardcoded controls, use a flexible modal system like Blender/ZBrush where pressing a key (R/S/F/L/H) sets what the mouse wheel adjusts.
+
+**Modes & Keyboard Shortcuts:**
+- [ ] **[R] Radius Mode:** Mouse wheel adjusts brush size (5-100)
+- [ ] **[S] Strength Mode:** Mouse wheel adjusts brush intensity (1-100)
+- [ ] **[F] Feather Mode:** Mouse wheel adjusts edge softness (0.0-1.0) 🆕
+- [ ] **[L] Start Level Mode:** Mouse wheel sets minimum affected height (0.0-1.0) 🆕
+- [ ] **[H] Max Height Mode:** Mouse wheel sets paint ceiling/floor (0.0-1.0) 🆕
+
+**Mouse Button Cycling (Alternative Input):**
+- [ ] Button 4 (programmable): Cycle through modes (Radius → Strength → Feather → Start Level → Max Height)
+- [ ] Visual mode indicator in viewport HUD
+
+**Modifier Keys:**
+- [ ] Shift + Mouse Wheel: Fine adjustment (0.1x speed)
+- [ ] Ctrl + Mouse Wheel: Coarse adjustment (2x speed)
+
+**Visual Feedback:**
+- [ ] Mode HUD (always visible in paint mode, top-left corner)
+  - Shows all modes with current values
+  - Highlights active mode in yellow
+  - Example: "[R] Radius: 35.0" ← active, "[S] Strength: 75.0" ← inactive
+- [ ] Adjustment overlay (temporary, near cursor)
+  - Appears when scrolling
+  - Shows visual slider and current value
+  - Fades after 1 second
+- [ ] Brush cursor updates to show current parameters
+  - Gradient ring for feather visualization
+  - Size changes reflect radius
+
+**New Parameters (Requires Implementation):**
+
+1. **Brush Feather/Falloff** 🆕
+   - [ ] Implement smoothstep falloff calculation
+   - [ ] 0.0 = Hard edge (stamp-like)
+   - [ ] 1.0 = Very soft edge (gradual blend)
+   - [ ] Visual: Brush cursor shows gradient ring
+   - [ ] Integration with all brush types
+
+2. **Paint Start Level (Height Masking - Lower Bound)** 🆕
+   - [ ] Only affect terrain **below** this height
+   - [ ] Use case: Fill valleys without touching peaks
+   - [ ] Visual: Blue horizontal line overlay on viewport
+   - [ ] Brush cursor tints red when over masked area
+   - [ ] Enable/disable toggle in UI
+
+3. **Max Paint Height (Height Ceiling/Floor)** 🆕
+   - [ ] Raise brush stops at this ceiling
+   - [ ] Lower brush stops at this floor
+   - [ ] Different from global height clamping (per-session)
+   - [ ] Use case: Create exact plateau heights
+   - [ ] Visual: Red horizontal line overlay on viewport
+
+**UI Implementation:**
+- [ ] Add "Mouse Wheel Modes" section to paint parameters
+- [ ] Mode dropdown (optional alternative to keyboard)
+- [ ] Show/hide HUD toggles
+- [ ] Show/hide adjustment overlay toggle
+- [ ] All parameter value sliders (with current values)
+- [ ] "Height Masking (Advanced)" collapsible section
+- [ ] Enable/disable toggles for start level and max height masking
+- [ ] Checkbox to show masking overlays on viewport
+
+**Technical Implementation:**
+- [ ] Add MouseWheelMode enum to LandscapeParameters
+- [ ] Add new parameter variables (feather, startLevel, maxHeight)
+- [ ] Keyboard mode selection (R/S/F/L/H key detection)
+- [ ] Mouse button mode cycling (Button 4)
+- [ ] Mouse wheel scroll handling with mode switching
+- [ ] HUD rendering system (ImGui overlays)
+- [ ] Brush falloff calculation update
+- [ ] Height masking logic in brush application
+- [ ] Viewport overlay rendering (horizontal lines for limits)
+
+**Benefits:**
+- ✅ One input controls many parameters (scalable)
+- ✅ Mnemonic keyboard shortcuts (F = Feather, easy to remember)
+- ✅ No menu diving during painting (maintain flow)
+- ✅ Industry-standard workflow (matches Blender/ZBrush)
+- ✅ Easy to add more modes in future
+
 ### **3.3 Stamp System**
 - [ ] Load grayscale stamps (PNG)
 - [ ] Stamp placement with preview

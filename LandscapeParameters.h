@@ -30,6 +30,23 @@ enum class TerrainType {
     Custom = 4
 };
 
+enum class EditorMode {
+    Select = 0,   // View/navigate only
+    Paint = 1,    // Paint mode (brush tools)
+    Sculpt = 2,   // Future: Advanced sculpting
+    Ramp = 3,     // Future: Ramp tool
+    Smooth = 4    // Future: Smoothing mode
+};
+
+enum class StartingTemplate {
+    PerlinNoise = 0,  // Procedural Perlin noise terrain
+    FlatSculptable = 1,  // Flat plane for sculpting from scratch
+    // Future templates:
+    // Hills = 2,
+    // Mountains = 3,
+    // Coastal = 4
+};
+
 struct LandscapeParameters {
     float waterLevel = 0.4f;
     float slopeThreshold = 0.01f;
@@ -53,7 +70,10 @@ struct LandscapeParameters {
     bool view3D = false;
     float heightScale = 0.5f;
 
-    bool paintMode = false;
+    // Editor mode system
+    EditorMode currentMode = EditorMode::Select;
+
+    bool paintMode = false;  // Legacy - will be replaced by currentMode == EditorMode::Paint
     BrushType brushType = BrushType::Raise;
     float brushRadius = 20.0f;
     float brushStrength = 50.0f;
@@ -68,6 +88,10 @@ struct LandscapeParameters {
 
     // Display options
     bool autoContrastDisplay = true;  // Auto-remap display range for visibility (doesn't modify data)
+
+    // New Project Dialog
+    bool showNewProjectDialog = false;
+    StartingTemplate startingTemplate = StartingTemplate::PerlinNoise;
 
     // Engine-aware scaling
     TargetEngine targetEngine = TargetEngine::UnrealEngine;

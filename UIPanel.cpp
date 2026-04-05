@@ -12,38 +12,61 @@
 void UIPanel::render(LandscapeParameters& params, const LandscapeDesign* design, Camera* camera) {
     ImGui::Begin("Landscape Designer", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-    ImGui::Text("Landscape Designer v0.5");
+    ImGui::Text("Landscape Designer v0.7.6");
     ImGui::Separator();
 
-    renderPreviewSelector(params);
+    // === MODE-AWARE RENDERING ===
+    // Show different controls based on active mode
 
-    ImGui::Spacing();
+    switch (params.currentMode) {
+        case EditorMode::Select:
+            // Select mode: Show all generation and preview controls
+            renderPreviewSelector(params);
+            ImGui::Spacing();
 
-    if (camera) {
-        render3DControls(params, camera);
-        ImGui::Spacing();
-    }
+            if (camera) {
+                render3DControls(params, camera);
+                ImGui::Spacing();
+            }
 
-    renderPaintModeControls(params);
+            renderParameterSliders(params);
+            ImGui::Spacing();
 
-    ImGui::Spacing();
+            renderErosionControls(params);
+            ImGui::Spacing();
 
-    renderErosionControls(params);
+            if (design) {
+                renderStatistics(design);
+            }
+            ImGui::Spacing();
 
-    ImGui::Spacing();
+            if (design) {
+                renderExportSection(params, design);
+            }
+            break;
 
-    renderParameterSliders(params);
+        case EditorMode::Paint:
+            // Paint mode: Show paint-specific controls
+            renderPaintModeControls(params);
+            ImGui::Spacing();
 
-    ImGui::Spacing();
+            if (design) {
+                renderStatistics(design);
+            }
+            ImGui::Spacing();
 
-    if (design) {
-        renderStatistics(design);
-    }
+            if (design) {
+                renderExportSection(params, design);
+            }
+            break;
 
-    ImGui::Spacing();
-
-    if (design) {
-        renderExportSection(params, design);
+        case EditorMode::Sculpt:
+        case EditorMode::Ramp:
+        case EditorMode::Smooth:
+            // Future modes - show placeholder
+            ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Mode Coming Soon!");
+            ImGui::Text("This mode is planned for a future update.");
+            break;
     }
 
     ImGui::End();
@@ -285,37 +308,28 @@ void UIPanel::render3DControls(LandscapeParameters& params, Camera* camera) {
 }
 
 void UIPanel::renderPaintModeControls(LandscapeParameters& params) {
-    if (ImGui::CollapsingHeader("Paint Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::Checkbox("Enable Paint Mode", &params.paintMode)) {
-            if (params.paintMode) {
-                params.view3D = false;
-                params.autoUpdate = false;
-            }
+    if (ImGui::CollapsingHeader("Paint Tools", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Paint Mode Active");
+        ImGui::Spacing();
+
+        // Display Controls
+        ImGui::Checkbox("Auto-Contrast Display", &params.autoContrastDisplay);
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Automatically remap display range for visibility.\nDoesn't modify your terrain data - display only!");
         }
 
-        if (params.paintMode) {
-            ImGui::Spacing();
-            ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Paint Mode Active - Auto-update disabled");
-            ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
 
-            // Display Controls
-            ImGui::Checkbox("Auto-Contrast Display", &params.autoContrastDisplay);
-            if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Automatically remap display range for visibility.\nDoesn't modify your terrain data - display only!");
-            }
+        const char* brushTypes[] = { "Raise", "Lower", "Smooth", "Flatten" };
+        int currentBrushType = static_cast<int>(params.brushType);
+        if (ImGui::Combo("Brush Type", &currentBrushType, brushTypes, 4)) {
+            params.brushType = static_cast<BrushType>(currentBrushType);
+        }
 
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
-
-            const char* brushTypes[] = { "Raise", "Lower", "Smooth", "Flatten" };
-            int currentBrushType = static_cast<int>(params.brushType);
-            if (ImGui::Combo("Brush Type", &currentBrushType, brushTypes, 4)) {
-                params.brushType = static_cast<BrushType>(currentBrushType);
-            }
-
-            ImGui::SliderFloat("Brush Radius", &params.brushRadius, 5.0f, 100.0f);
-            ImGui::SliderFloat("Brush Strength", &params.brushStrength, 1.0f, 100.0f);
+        ImGui::SliderFloat("Brush Radius", &params.brushRadius, 5.0f, 100.0f);
+        ImGui::SliderFloat("Brush Strength", &params.brushStrength, 1.0f, 100.0f);
 
             if (params.brushType == BrushType::Flatten) {
                 ImGui::Spacing();
@@ -508,31 +522,26 @@ void UIPanel::renderPaintModeControls(LandscapeParameters& params) {
                     ImGui::Text("  Normalized: %.3f - %.3f", params.minHeight, params.maxHeight);
                     ImGui::Text("  Real-world: %.1fm - %.1fm", minMeters, maxMeters);
 
-                    ImGui::Spacing();
+                                ImGui::Spacing();
 
-                    if (ImGui::Button("Recalculate Range", ImVec2(-1, 0))) {
-                        auto range = EngineScalingHelper::calculateClampRange(params);
-                        params.minHeight = range.first;
-                        params.maxHeight = range.second;
+                                if (ImGui::Button("Recalculate Range", ImVec2(-1, 0))) {
+                                    auto range = EngineScalingHelper::calculateClampRange(params);
+                                    params.minHeight = range.first;
+                                    params.maxHeight = range.second;
+                                }
+                            }
+
+                            ImGui::TreePop();
+                        }
+
+                        ImGui::Spacing();
+                        ImGui::Text("Controls:");
+                        ImGui::BulletText("Left Click + Drag: Paint");
+                        ImGui::BulletText("Ctrl+Z: Undo");
+                        ImGui::BulletText("Ctrl+Y: Redo");
+                        ImGui::BulletText("D: Dump heightmap data");
                     }
-                }
-
-                ImGui::TreePop();
-            }
-
-            ImGui::Spacing();
-            ImGui::Text("Controls:");
-            ImGui::BulletText("Left Click + Drag: Paint");
-            ImGui::BulletText("Ctrl+Z: Undo (coming soon)");
-
-            ImGui::Spacing();
-            if (ImGui::Button("Exit Paint Mode", ImVec2(-1, 0))) {
-                params.paintMode = false;
-                params.autoUpdate = true;
-            }
-        }
-    }
-}
+                    }
 
 void UIPanel::renderErosionControls(LandscapeParameters& params) {
     if (ImGui::CollapsingHeader("Erosion Simulation", ImGuiTreeNodeFlags_DefaultOpen)) {

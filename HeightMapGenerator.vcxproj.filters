@@ -143,5 +143,8 @@
     <None Include="3_PANEL_LAYOUT_IMPLEMENTATION.md" />
     <None Include="3_PANEL_VISUAL_GUIDE.md" />
     <None Include="V075_RELEASE_SUMMARY.md" />
+    <None Include="V076_MENU_SYSTEM_IMPLEMENTATION.md" />
+    <None Include="V076_UPDATE_NOTES.md" />
+    <None Include="COMPLETE_FEATURE_SUMMARY.md" />
   </ItemGroup>
 </Project>

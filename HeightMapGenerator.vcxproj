@@ -164,6 +164,7 @@
     <None Include="3_PANEL_LAYOUT_IMPLEMENTATION.md" />
     <None Include="3_PANEL_VISUAL_GUIDE.md" />
     <None Include="CHECKLIST.md" />
+    <None Include="COMPLETE_FEATURE_SUMMARY.md" />
     <None Include="DOCKING_IMPLEMENTATION_GUIDE.md" />
     <None Include="DUAL_VIEWPORT_IMPLEMENTATION.md" />
     <None Include="DUAL_VIEWPORT_QUICK_START.md" />
@@ -197,6 +198,8 @@
     <None Include="TODO.md" />
     <None Include="UPGRADE_SUMMARY.md" />
     <None Include="V075_RELEASE_SUMMARY.md" />
+    <None Include="V076_MENU_SYSTEM_IMPLEMENTATION.md" />
+    <None Include="V076_UPDATE_NOTES.md" />
     <None Include="V07_RELEASE_NOTES.md" />
     <None Include="VERSION_0.3_3D_RELEASE.md" />
   </ItemGroup>
