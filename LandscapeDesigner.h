@@ -6,6 +6,7 @@
 class LandscapeDesigner {
 public:
     static Image normalize(const Image& src);
+    static Image normalizeToRange(const Image& src, float targetMin, float targetMax);
 
     static Image computeSlope(const Image& height);
 

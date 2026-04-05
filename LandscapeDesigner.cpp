@@ -21,7 +21,7 @@ Image LandscapeDesigner::normalize(const Image& src) {
     }
 
     Image result(src.width(), src.height());
-    
+
     float range = maxVal - minVal;
     if (range < 1e-6f) {
         return result;
@@ -29,6 +29,45 @@ Image LandscapeDesigner::normalize(const Image& src) {
 
     for (size_t i = 0; i < src.size(); ++i) {
         result.at(i) = (src.at(i) - minVal) / range;
+    }
+
+    return result;
+}
+
+Image LandscapeDesigner::normalizeToRange(const Image& src, float targetMin, float targetMax) {
+    if (src.size() == 0) {
+        return Image();
+    }
+
+    // Find current min/max
+    float minVal = std::numeric_limits<float>::max();
+    float maxVal = std::numeric_limits<float>::lowest();
+
+    for (size_t i = 0; i < src.size(); ++i) {
+        minVal = std::min(minVal, src.at(i));
+        maxVal = std::max(maxVal, src.at(i));
+    }
+
+    Image result(src.width(), src.height());
+
+    float currentRange = maxVal - minVal;
+    if (currentRange < 1e-6f) {
+        // Flat terrain - set to middle of target range
+        float midpoint = (targetMin + targetMax) * 0.5f;
+        for (size_t i = 0; i < result.size(); ++i) {
+            result.at(i) = midpoint;
+        }
+        return result;
+    }
+
+    float targetRange = targetMax - targetMin;
+
+    // Remap each value from current range to target range
+    // Preserves relative heights: if value was 80% through current range,
+    // it will be 80% through target range
+    for (size_t i = 0; i < src.size(); ++i) {
+        float normalized = (src.at(i) - minVal) / currentRange;  // 0.0 to 1.0
+        result.at(i) = targetMin + (normalized * targetRange);
     }
 
     return result;

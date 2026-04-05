@@ -15,6 +15,21 @@ enum class BrushType {
     Flatten = 3
 };
 
+enum class TargetEngine {
+    UnrealEngine = 0,
+    Unity = 1,
+    Godot = 2,
+    Custom = 3
+};
+
+enum class TerrainType {
+    Plains = 0,
+    Hills = 1,
+    Mountains = 2,
+    Coastal = 3,
+    Custom = 4
+};
+
 struct LandscapeParameters {
     float waterLevel = 0.4f;
     float slopeThreshold = 0.01f;
@@ -43,6 +58,24 @@ struct LandscapeParameters {
     float brushRadius = 20.0f;
     float brushStrength = 50.0f;
     float flattenHeight = 0.5f;
+
+    // Height clamping parameters
+    bool enableHeightClamping = true;
+    float minHeight = 0.0f;
+    float maxHeight = 1.0f;
+    bool softClampMode = true;  // true = ease-in near limits, false = hard stop
+    bool brushRespectsClamping = true;  // Per-brush override (future use)
+
+    // Display options
+    bool autoContrastDisplay = true;  // Auto-remap display range for visibility (doesn't modify data)
+
+    // Engine-aware scaling
+    TargetEngine targetEngine = TargetEngine::UnrealEngine;
+    TerrainType terrainType = TerrainType::Hills;
+    float characterHeight = 180.0f;  // cm (UE5 default)
+    float terrainWorldSize = 1000.0f;  // meters (terrain physical size in engine)
+    bool useEnginePresets = false;  // Enable engine-aware clamping
+    bool normalizeTerrainToRange = false;  // Trigger to remap terrain to current min/max range
 
     bool erosionMode = false;
     int hydraulicIterations = 50000;

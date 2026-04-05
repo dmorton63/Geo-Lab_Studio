@@ -14,8 +14,8 @@ public:
     void cleanup();
 
     void uploadTexture(const Image& image);
-    void renderQuad(int windowWidth, int windowHeight, int previewMode = 0);
-    void render3D(int windowWidth, int windowHeight, const Camera& camera, int previewMode = 0);
+    void renderQuad(int windowWidth, int windowHeight, int previewMode = 0, bool autoContrast = true);
+    void render3D(int windowWidth, int windowHeight, const Camera& camera, int previewMode = 0, bool autoContrast = true);
     void drawBrushCursor(int windowWidth, int windowHeight, float mouseX, float mouseY, float radius);
 
     void updateTerrainMesh(const Image& heightmap, float heightScale = 1.0f);
@@ -30,6 +30,10 @@ private:
     GLuint vbo = 0;
 
     TerrainMesh terrainMesh;
+
+    // Display range for auto-contrast
+    float displayMin = 0.0f;
+    float displayMax = 1.0f;
 
     GLuint compileShader(const char* source, GLenum type);
     GLuint createShaderProgram2D();

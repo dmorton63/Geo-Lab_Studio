@@ -22,6 +22,9 @@ in vec2 TexCoord;
 
 uniform sampler2D heightTexture;
 uniform int previewMode;
+uniform int autoContrast;
+uniform float displayMin;
+uniform float displayMax;
 
 vec3 heatmap(float t) {
     // Blue -> Cyan -> Green -> Yellow -> Red
@@ -47,8 +50,14 @@ vec3 heatmap(float t) {
 void main() {
     float value = texture(heightTexture, TexCoord).r;
 
+    // Apply auto-contrast if enabled (display only, doesn't modify data)
+    if (autoContrast == 1 && previewMode == 0) {
+        value = (value - displayMin) / (displayMax - displayMin);
+        value = clamp(value, 0.0, 1.0);
+    }
+
     if (previewMode == 0) {
-        // Height - Grayscale
+        // Height - Grayscale (with optional auto-contrast)
         FragColor = vec4(value, value, value, 1.0);
     }
     else if (previewMode == 1) {
@@ -135,6 +144,9 @@ in float Height;
 uniform sampler2D heightTexture;
 uniform int previewMode;
 uniform vec3 lightDir;
+uniform int autoContrast;
+uniform float displayMin;
+uniform float displayMax;
 
 vec3 heatmap(float t) {
     t = clamp(t, 0.0, 1.0);
@@ -156,6 +168,13 @@ vec3 heatmap(float t) {
 
 void main() {
     float value = texture(heightTexture, TexCoord).r;
+
+    // Apply auto-contrast if enabled (display only, doesn't modify data)
+    if (autoContrast == 1 && previewMode == 0) {
+        value = (value - displayMin) / (displayMax - displayMin);
+        value = clamp(value, 0.0, 1.0);
+    }
+
     vec3 baseColor;
 
     if (previewMode == 0) {
@@ -256,12 +275,31 @@ void Renderer::cleanup() {
 }
 
 void Renderer::uploadTexture(const Image& image) {
+    // Calculate min/max for auto-contrast display
+    if (image.size() > 0) {
+        displayMin = image.data()[0];
+        displayMax = image.data()[0];
+
+        for (const auto& val : image.data()) {
+            if (val < displayMin) displayMin = val;
+            if (val > displayMax) displayMax = val;
+        }
+
+        // Avoid division by zero
+        if (std::abs(displayMax - displayMin) < 0.001f) {
+            displayMin = 0.0f;
+            displayMax = 1.0f;
+        }
+    }
+
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, image.width(), image.height(), 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 
+                 static_cast<GLsizei>(image.width()), 
+                 static_cast<GLsizei>(image.height()), 
                  0, GL_RED, GL_FLOAT, image.data().data());
 }
 
-void Renderer::renderQuad(int windowWidth, int windowHeight, int previewMode) {
+void Renderer::renderQuad(int windowWidth, int windowHeight, int previewMode, bool autoContrast) {
     glViewport(0, 0, windowWidth, windowHeight);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -271,13 +309,21 @@ void Renderer::renderQuad(int windowWidth, int windowHeight, int previewMode) {
     GLint previewModeLocation = glGetUniformLocation(shaderProgram2D, "previewMode");
     glUniform1i(previewModeLocation, previewMode);
 
+    // Pass auto-contrast parameters to shader
+    GLint autoContrastLoc = glGetUniformLocation(shaderProgram2D, "autoContrast");
+    GLint displayMinLoc = glGetUniformLocation(shaderProgram2D, "displayMin");
+    GLint displayMaxLoc = glGetUniformLocation(shaderProgram2D, "displayMax");
+    glUniform1i(autoContrastLoc, autoContrast ? 1 : 0);
+    glUniform1f(displayMinLoc, displayMin);
+    glUniform1f(displayMaxLoc, displayMax);
+
     glBindTexture(GL_TEXTURE_2D, textureID);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
 
-void Renderer::render3D(int windowWidth, int windowHeight, const Camera& camera, int previewMode) {
+void Renderer::render3D(int windowWidth, int windowHeight, const Camera& camera, int previewMode, bool autoContrast) {
     glViewport(0, 0, windowWidth, windowHeight);
     glClearColor(0.15f, 0.15f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -298,21 +344,44 @@ void Renderer::render3D(int windowWidth, int windowHeight, const Camera& camera,
     GLint previewModeLoc = glGetUniformLocation(shaderProgram3D, "previewMode");
     GLint lightDirLoc = glGetUniformLocation(shaderProgram3D, "lightDir");
 
+    // Pass auto-contrast parameters to 3D shader
+    GLint autoContrastLoc = glGetUniformLocation(shaderProgram3D, "autoContrast");
+    GLint displayMinLoc = glGetUniformLocation(shaderProgram3D, "displayMin");
+    GLint displayMaxLoc = glGetUniformLocation(shaderProgram3D, "displayMax");
+
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
     glUniform1i(previewModeLoc, previewMode);
     glUniform3f(lightDirLoc, 0.3f, 0.8f, 0.5f);
+    glUniform1i(autoContrastLoc, autoContrast ? 1 : 0);
+    glUniform1f(displayMinLoc, displayMin);
+    glUniform1f(displayMaxLoc, displayMax);
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     terrainMesh.bind();
-    glDrawElements(GL_TRIANGLES, terrainMesh.getIndexCount(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(terrainMesh.getIndexCount()), GL_UNSIGNED_INT, 0);
     terrainMesh.unbind();
 }
 
 void Renderer::updateTerrainMesh(const Image& heightmap, float heightScale) {
-    terrainMesh.generateFromHeightmap(heightmap, heightScale);
+    // Auto-boost height scale for narrow ranges (like engine presets)
+    // If the data range is less than 0.5, scale it up proportionally
+    float dataRange = displayMax - displayMin;
+    float effectiveHeightScale = heightScale;
+
+    if (dataRange < 0.5f && dataRange > 0.001f) {
+        // Boost the height scale to compensate for narrow data range
+        // Target effective range of 0.5 (reasonable 3D height)
+        effectiveHeightScale = heightScale * (0.5f / dataRange);
+
+        // Cap the boost to avoid extreme values
+        effectiveHeightScale = std::min(effectiveHeightScale, heightScale * 5.0f);
+    }
+
+    terrainMesh.generateFromHeightmap(heightmap, effectiveHeightScale);
 }
+
 
 void Renderer::drawBrushCursor(int windowWidth, int windowHeight, float mouseX, float mouseY, float radius) {
     // Draw circle using immediate mode-style rendering with line loop

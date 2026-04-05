@@ -1,11 +1,13 @@
 #include "UIPanel.h"
 #include "ImageExporter.h"
+#include "EngineScalingHelper.h"
 #include <imgui.h>
 #include <random>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
+#include <algorithm>
 
 void UIPanel::render(LandscapeParameters& params, const LandscapeDesign* design, Camera* camera) {
     ImGui::Begin("Landscape Designer", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
@@ -296,6 +298,16 @@ void UIPanel::renderPaintModeControls(LandscapeParameters& params) {
             ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Paint Mode Active - Auto-update disabled");
             ImGui::Spacing();
 
+            // Display Controls
+            ImGui::Checkbox("Auto-Contrast Display", &params.autoContrastDisplay);
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Automatically remap display range for visibility.\nDoesn't modify your terrain data - display only!");
+            }
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
             const char* brushTypes[] = { "Raise", "Lower", "Smooth", "Flatten" };
             int currentBrushType = static_cast<int>(params.brushType);
             if (ImGui::Combo("Brush Type", &currentBrushType, brushTypes, 4)) {
@@ -312,6 +324,200 @@ void UIPanel::renderPaintModeControls(LandscapeParameters& params) {
                 if (ImGui::Button("Sample")) {
                     // Will be set from main.cpp when clicking
                 }
+            }
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // Height Clamping Controls
+            if (ImGui::TreeNode("Height Clamping")) {
+                if (ImGui::Checkbox("Enable Clamping", &params.enableHeightClamping)) {
+                    // Clamp current flatten height if needed
+                    if (params.enableHeightClamping) {
+                        params.flattenHeight = std::clamp(params.flattenHeight, params.minHeight, params.maxHeight);
+                    }
+                }
+
+                ImGui::TextWrapped("Prevents terrain from exceeding height limits during painting.");
+
+                if (params.enableHeightClamping) {
+                    ImGui::Spacing();
+
+                    ImGui::SliderFloat("Min Height", &params.minHeight, 0.0f, 0.9f);
+                    ImGui::SliderFloat("Max Height", &params.maxHeight, 0.1f, 1.0f);
+
+                    // Ensure min < max
+                    if (params.minHeight >= params.maxHeight) {
+                        params.minHeight = params.maxHeight - 0.01f;
+                    }
+
+                    ImGui::Spacing();
+                    ImGui::Text("Quick Presets:");
+
+                    if (ImGui::Button("0.0 - 1.0 (Full)", ImVec2(-1, 0))) {
+                        params.minHeight = 0.0f;
+                        params.maxHeight = 1.0f;
+                    }
+                    if (ImGui::Button("0.1 - 0.9 (Safe)", ImVec2(-1, 0))) {
+                        params.minHeight = 0.1f;
+                        params.maxHeight = 0.9f;
+                    }
+                    if (ImGui::Button("0.2 - 0.8 (Conservative)", ImVec2(-1, 0))) {
+                        params.minHeight = 0.2f;
+                        params.maxHeight = 0.8f;
+                    }
+
+                    ImGui::Spacing();
+                    ImGui::Checkbox("Soft Clamp Mode", &params.softClampMode);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Ease-in near limits for natural feel.\nHard mode stops immediately at limits.");
+                    }
+                }
+
+                ImGui::TreePop();
+            }
+
+            ImGui::Spacing();
+
+            // Engine-Aware Presets
+            if (ImGui::TreeNode("Engine-Aware Presets")) {
+                ImGui::TextWrapped("Set natural height limits based on your target game engine and character size.");
+
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 1.0f, 1.0f), "💡 Tip:");
+                ImGui::TextWrapped("Best used BEFORE generating terrain, or with Normalize Terrain button.");
+                ImGui::Spacing();
+
+                if (ImGui::Checkbox("Use Engine Presets", &params.useEnginePresets)) {
+                    if (params.useEnginePresets) {
+                        // Calculate engine-based range but DON'T auto-enable clamping
+                        // This lets user review the range first
+                        auto range = EngineScalingHelper::calculateClampRange(params);
+                        params.minHeight = range.first;
+                        params.maxHeight = range.second;
+
+                        // Mark for update to give user feedback
+                        params.markChanged();
+                    }
+                }
+
+                // Info box when engine presets are active
+                if (params.useEnginePresets) {
+                    ImGui::Spacing();
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "✓ Engine presets active");
+                    ImGui::TextWrapped("Min/Max values calculated. Enable 'Height Clamping' above to apply limits to painting.");
+
+                    ImGui::Spacing();
+                    if (ImGui::Button("Normalize Terrain to Range", ImVec2(-1, 0))) {
+                        params.normalizeTerrainToRange = true;
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Remap existing terrain to fit current min/max range.\nPreserves relative heights and features.");
+                    }
+
+                    ImGui::Spacing();
+                }
+
+                // Warning if clamping is enabled with very restrictive range
+                if (params.useEnginePresets && params.enableHeightClamping) {
+                    float rangeSize = params.maxHeight - params.minHeight;
+                    if (rangeSize < 0.2f) {  // Less than 20% of full range
+                        ImGui::Spacing();
+                        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "⚠️ Clamping Active: Narrow Range!");
+                        ImGui::TextWrapped("Current range is %.1f%%. Painting is restricted. "
+                                          "Existing terrain outside this range won't be affected unless you paint over it.",
+                                          rangeSize * 100.0f);
+                        ImGui::Spacing();
+                    }
+                }
+
+                if (params.useEnginePresets) {
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    // Engine selection
+                    const char* engines[] = { "Unreal Engine", "Unity", "Godot", "Custom" };
+                    int currentEngine = static_cast<int>(params.targetEngine);
+                    if (ImGui::Combo("Target Engine", &currentEngine, engines, 4)) {
+                        params.targetEngine = static_cast<TargetEngine>(currentEngine);
+
+                        // Load engine defaults
+                        auto spec = EngineScalingHelper::getEngineSpec(params.targetEngine);
+                        params.characterHeight = spec.characterHeight;
+
+                        // Recalculate range
+                        auto range = EngineScalingHelper::calculateClampRange(params);
+                        params.minHeight = range.first;
+                        params.maxHeight = range.second;
+                    }
+
+                    // Terrain type selection
+                    const char* terrainTypes[] = { "Plains", "Hills", "Mountains", "Coastal", "Custom" };
+                    int currentTerrain = static_cast<int>(params.terrainType);
+                    if (ImGui::Combo("Terrain Type", &currentTerrain, terrainTypes, 5)) {
+                        params.terrainType = static_cast<TerrainType>(currentTerrain);
+
+                        // Recalculate range
+                        auto range = EngineScalingHelper::calculateClampRange(params);
+                        params.minHeight = range.first;
+                        params.maxHeight = range.second;
+                    }
+
+                    ImGui::Spacing();
+
+                    // Character height (editable for custom tuning)
+                    if (ImGui::SliderFloat("Character Height (cm)", &params.characterHeight, 50.0f, 300.0f)) {
+                        // Recalculate range
+                        auto range = EngineScalingHelper::calculateClampRange(params);
+                        params.minHeight = range.first;
+                        params.maxHeight = range.second;
+                    }
+
+                    // Terrain world size
+                    if (ImGui::SliderFloat("Terrain Size (m)", &params.terrainWorldSize, 100.0f, 5000.0f)) {
+                        // Recalculate range
+                        auto range = EngineScalingHelper::calculateClampRange(params);
+                        params.minHeight = range.first;
+                        params.maxHeight = range.second;
+                    }
+
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    // Display calculated info
+                    std::string desc = EngineScalingHelper::getHeightRangeDescription(
+                        params.targetEngine,
+                        params.terrainType,
+                        params.characterHeight,
+                        params.terrainWorldSize
+                    );
+
+                    ImGui::TextWrapped("%s", desc.c_str());
+
+                    ImGui::Spacing();
+
+                    // Show normalized range
+                    float minMeters = EngineScalingHelper::normalizedToMeters(params.minHeight, params.terrainWorldSize);
+                    float maxMeters = EngineScalingHelper::normalizedToMeters(params.maxHeight, params.terrainWorldSize);
+
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), 
+                        "Active Range:");
+                    ImGui::Text("  Normalized: %.3f - %.3f", params.minHeight, params.maxHeight);
+                    ImGui::Text("  Real-world: %.1fm - %.1fm", minMeters, maxMeters);
+
+                    ImGui::Spacing();
+
+                    if (ImGui::Button("Recalculate Range", ImVec2(-1, 0))) {
+                        auto range = EngineScalingHelper::calculateClampRange(params);
+                        params.minHeight = range.first;
+                        params.maxHeight = range.second;
+                    }
+                }
+
+                ImGui::TreePop();
             }
 
             ImGui::Spacing();

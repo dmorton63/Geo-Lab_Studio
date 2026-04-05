@@ -92,6 +92,12 @@
     <ClInclude Include="DataDumper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EngineScalingHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Framebuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="SETUP.md" />
@@ -116,5 +122,26 @@
     <None Include="PAINT_MODE_SUMMARY.md" />
     <None Include="PROJECT_COMPLETE.md" />
     <None Include="VERSION_0.3_3D_RELEASE.md" />
+    <None Include="TODO.md" />
+    <None Include=".gitignore" />
+    <None Include="PHASE_1_1_COMPLETE.md" />
+    <None Include="ENGINE_AWARE_GUIDE.md" />
+    <None Include="ENGINE_AWARE_COMPLETE.md" />
+    <None Include="ENGINE_AWARE_VISUAL_REFERENCE.md" />
+    <None Include="TODAY_ACHIEVEMENT_SUMMARY.md" />
+    <None Include="QUICK_REFERENCE.md" />
+    <None Include="DOCKING_IMPLEMENTATION_GUIDE.md" />
+    <None Include="SESSION_3_SUMMARY.md" />
+    <None Include="NORMALIZE_FEATURE_COMPLETE.md" />
+    <None Include="NORMALIZE_IMPLEMENTATION_SUMMARY.md" />
+    <None Include="NORMALIZE_USER_GUIDE.md" />
+    <None Include="SESSION_3_PART_2_SUMMARY.md" />
+    <None Include="PAINT_MODE_BUG_FIX.md" />
+    <None Include="DUAL_VIEWPORT_IMPLEMENTATION.md" />
+    <None Include="DUAL_VIEWPORT_QUICK_START.md" />
+    <None Include="V07_RELEASE_NOTES.md" />
+    <None Include="3_PANEL_LAYOUT_IMPLEMENTATION.md" />
+    <None Include="3_PANEL_VISUAL_GUIDE.md" />
+    <None Include="V075_RELEASE_SUMMARY.md" />
   </ItemGroup>
 </Project>
