@@ -47,6 +47,14 @@ enum class StartingTemplate {
     // Coastal = 4
 };
 
+enum class MouseWheelMode {
+    Radius = 0,      // [R] Adjust brush radius (5-100)
+    Strength = 1,    // [S] Adjust brush strength (1-100)
+    Feather = 2,     // [F] Adjust brush feather/softness (0.0-1.0)
+    StartLevel = 3,  // [L] Adjust start level mask (0.0-1.0)
+    MaxHeight = 4    // [H] Adjust max paint height (0.0-1.0)
+};
+
 struct LandscapeParameters {
     float waterLevel = 0.4f;
     float slopeThreshold = 0.01f;
@@ -78,6 +86,17 @@ struct LandscapeParameters {
     float brushRadius = 20.0f;
     float brushStrength = 50.0f;
     float flattenHeight = 0.5f;
+
+    // Modal Mouse Wheel System (V0.8.0)
+    MouseWheelMode mouseWheelMode = MouseWheelMode::Radius;  // Current parameter being adjusted
+    float brushFeather = 0.5f;          // Edge softness (0.0 = hard edge, 1.0 = soft fade)
+    float paintStartLevel = 0.0f;       // Height masking lower bound (only affect pixels below this)
+    float maxPaintHeight = 1.0f;        // Paint ceiling (Raise) or floor (Lower)
+    bool enableStartLevelMasking = false;  // Enable height masking feature
+    bool enableMaxPaintHeight = false;     // Enable max height limiting
+    bool showModeHUD = true;               // Show mode indicator overlay
+    bool showAdjustmentOverlay = true;     // Show temporary value change feedback
+    float mouseControlSensitivity = 1.0f;  // Scroll sensitivity multiplier
 
     // Height clamping parameters
     bool enableHeightClamping = true;

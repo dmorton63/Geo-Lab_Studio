@@ -158,5 +158,8 @@
     <None Include="DESIGN_EVOLUTION_MOUSE_CONTROLS.md" />
     <None Include="MODAL_WHEEL_QUICK_REF.md" />
     <None Include="PHASE_2_1_IMPORT_COMPLETE.md" />
+    <None Include="PHASE_2_2_EXPORT_COMPLETE.md" />
+    <None Include="REALISTIC_TEMPLATES_SPEC.md" />
+    <None Include="NOAA_DEM_IMPORT_SPEC.md" />
   </ItemGroup>
 </Project>

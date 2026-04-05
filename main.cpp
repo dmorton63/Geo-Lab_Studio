@@ -226,6 +226,39 @@ int main() {
         ctrlPressed = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || 
                        glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
 
+        // === MODAL MOUSE WHEEL SYSTEM (V0.8.0) ===
+        // Keyboard shortcuts for mode switching (R/S/F/L/H) - only in Paint mode
+        if (params.paintMode && !io.WantCaptureKeyboard) {
+            static double lastModeChangeTime = 0.0;
+            double currentTime = glfwGetTime();
+
+            // R - Radius mode
+            if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && currentTime - lastModeChangeTime > 0.2) {
+                params.mouseWheelMode = MouseWheelMode::Radius;
+                lastModeChangeTime = currentTime;
+            }
+            // S - Strength mode
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && currentTime - lastModeChangeTime > 0.2) {
+                params.mouseWheelMode = MouseWheelMode::Strength;
+                lastModeChangeTime = currentTime;
+            }
+            // F - Feather mode
+            if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && currentTime - lastModeChangeTime > 0.2) {
+                params.mouseWheelMode = MouseWheelMode::Feather;
+                lastModeChangeTime = currentTime;
+            }
+            // L - Start Level mode
+            if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && currentTime - lastModeChangeTime > 0.2) {
+                params.mouseWheelMode = MouseWheelMode::StartLevel;
+                lastModeChangeTime = currentTime;
+            }
+            // H - Max Height mode
+            if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && currentTime - lastModeChangeTime > 0.2) {
+                params.mouseWheelMode = MouseWheelMode::MaxHeight;
+                lastModeChangeTime = currentTime;
+            }
+        }
+
         // Handle Undo (Ctrl+Z)
         if (ctrlPressed && glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS && !undoStack.empty()) {
             static double lastUndoTime = 0.0;
@@ -849,6 +882,47 @@ int main() {
                 }
             } else {
                 isPainting = false;
+            }
+
+            // === MODAL MOUSE WHEEL ADJUSTMENT (V0.8.0) ===
+            // Only process mouse wheel when hovering paint viewport (not during UI interaction)
+            if (io.MouseWheel != 0.0f && !io.WantCaptureMouse) {
+                // Detect modifier keys for fine/coarse adjustment
+                bool shiftPressed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || 
+                                    glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
+                bool ctrlPressedLocal = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || 
+                                        glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
+
+                // Calculate scroll delta with modifier adjustments
+                float scrollDelta = io.MouseWheel * params.mouseControlSensitivity;
+                if (shiftPressed) {
+                    scrollDelta *= 0.1f;  // Fine adjustment (10x slower)
+                } else if (ctrlPressedLocal) {
+                    scrollDelta *= 3.0f;  // Coarse adjustment (3x faster)
+                }
+
+                // Adjust parameter based on current mode
+                switch (params.mouseWheelMode) {
+                    case MouseWheelMode::Radius:
+                        params.brushRadius = std::clamp(params.brushRadius + scrollDelta * 2.0f, 5.0f, 100.0f);
+                        break;
+
+                    case MouseWheelMode::Strength:
+                        params.brushStrength = std::clamp(params.brushStrength + scrollDelta * 2.0f, 1.0f, 100.0f);
+                        break;
+
+                    case MouseWheelMode::Feather:
+                        params.brushFeather = std::clamp(params.brushFeather + scrollDelta * 0.05f, 0.0f, 1.0f);
+                        break;
+
+                    case MouseWheelMode::StartLevel:
+                        params.paintStartLevel = std::clamp(params.paintStartLevel + scrollDelta * 0.05f, 0.0f, 1.0f);
+                        break;
+
+                    case MouseWheelMode::MaxHeight:
+                        params.maxPaintHeight = std::clamp(params.maxPaintHeight + scrollDelta * 0.05f, 0.0f, 1.0f);
+                        break;
+                }
             }
         }
 
