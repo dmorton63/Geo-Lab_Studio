@@ -1,21 +1,45 @@
-# Landscape Designer V0.7.6 - Complete Feature Summary
+# Landscape Designer V0.7.7 - Complete Feature Summary
 
-## What's New in V0.7.6
+## What's New in V0.7.7
 
-### 🐛 Bug Fixes
+### 📥 Heightmap Import System (Phase 2.1)
+Professional heightmap import workflow accessible via **File → Import Heightmap** (Ctrl+O)
+
+#### Supported Formats:
+- **16-bit RAW** (.raw, .r16) - Industry standard, used by World Machine, Gaea, UE5, Unity
+- **32-bit Float RAW** (.r32) - High-precision heightmaps
+- **8-bit RAW** (.r8) - Simple grayscale heightmaps
+
+#### Features:
+- Auto-detection of min/max elevation values
+- Automatic normalization to [0.0, 1.0] range
+- Windows file dialog for easy file selection
+- Auto-resampling if resolution doesn't match current setting
+- Clears undo/redo for fresh start
+- Instant integration with all editing tools
+
+**Use Case:** Import heightmaps from World Machine, Gaea, scientific DEM data, or any terrain tool, then enhance with paint/erosion/analysis features!
+
+---
+
+## Previous Updates
+
+### V0.7.6 - Menu Bar & Mode System
+
+#### 🐛 Bug Fixes
 1. **Tools panel no longer hides** - Fixed panel getting hidden behind viewports when clicking outside
 2. **Paint mode display fixed** - Auto-contrast now enabled automatically, no more dark display
 
-### 🆕 New Project Dialog System
+#### 🆕 New Project Dialog System
 Professional project initialization workflow accessible via **File → New Project** (Ctrl+N)
 
-#### Project Setup Options:
+**Project Setup Options:**
 - **Target Engine** - Unreal Engine, Unity, Godot, or Custom
 - **Terrain Type** - Plains, Hills, Mountains, Coastal, or Custom
 - **World Size** - 512m, 1km, 2km, 4km, or 8km
 - **Starting Template** - Perlin Noise (procedural) or Flat (blank canvas)
 
-#### Automatic Configuration:
+**Automatic Configuration:**
 - Sets engine-appropriate height ranges
 - Enables height clamping with calculated limits
 - Generates initial terrain based on template choice
@@ -31,6 +55,14 @@ Professional project initialization workflow accessible via **File → New Proje
 - ✅ **Multiple Resolutions** (128, 256, 512, 1024)
 - ✅ **Real-time Preview** with async generation
 - ✅ **Flat Terrain Template** for sculpting
+
+### Heightmap Import/Export
+- ✅ **Import RAW Heightmaps** (8-bit, 16-bit, 32-bit float)
+- ✅ **Auto-Normalization** (preserves terrain shape)
+- ✅ **Auto-Resampling** (handles resolution mismatches)
+- ✅ **Windows File Dialog** integration
+- 🔜 **Export RAW** (coming in Phase 2.2)
+- 🔜 **PNG Import/Export** (future enhancement)
 
 ### Paint/Sculpt System
 - ✅ **4 Brush Types** (Raise, Lower, Smooth, Flatten)
@@ -108,8 +140,8 @@ Professional project initialization workflow accessible via **File → New Proje
 
 ### File Menu
 - **New Project...** (Ctrl+N) - Project setup dialog
-- **Import Heightmap...** (Ctrl+O) - *Coming in Phase 2.1*
-- **Export Heightmap...** (Ctrl+S) - *Coming soon*
+- **Import Heightmap...** (Ctrl+O) - Import RAW heightmaps ✅ V0.7.7
+- **Export Heightmap...** (Ctrl+S) - *Coming in Phase 2.2*
 - **Exit** (Alt+F4) - Close application
 
 ### Edit Menu
@@ -199,6 +231,7 @@ Professional project initialization workflow accessible via **File → New Proje
 | Shortcut | Action |
 |----------|--------|
 | **Ctrl+N** | New Project |
+| **Ctrl+O** | Import Heightmap ✅ V0.7.7 |
 | **Ctrl+Z** | Undo (paint mode) |
 | **Ctrl+Y** | Redo (paint mode) |
 | **Home** | Reset Camera |
@@ -237,26 +270,36 @@ Professional project initialization workflow accessible via **File → New Proje
 6. Normalize to final height range
 7. Export all layers (height + analysis)
 
+### Import & Edit Workflow ✅ NEW in V0.7.7
+1. **File → Import Heightmap** (Ctrl+O)
+2. Select RAW file from World Machine, Gaea, or other tool
+3. Heightmap loads and auto-normalizes to [0.0, 1.0]
+4. Use all analysis tools (slope, curvature, biome masks)
+5. Apply erosion for natural weathering
+6. Switch to Paint mode for manual edits
+7. Export enhanced heightmap back to game engine
+
 ---
 
 ## Version History
 
-- **V0.7.0** - Initial 3-panel layout
+- **V0.7.7** - Heightmap Import (Phase 2.1 complete) ✅ CURRENT
+- **V0.7.6** - Menu bar, mode toolbar, New Project dialog, bug fixes
 - **V0.7.5** - Auto-contrast, 3D camera controls, viewport focus tracking
-- **V0.7.6** - Menu bar, mode toolbar, New Project dialog, bug fixes (current)
+- **V0.7.0** - Initial 3-panel layout
 
 ---
 
 ## What's Next?
 
 **Immediate Next Steps:**
-- Test New Project dialog thoroughly
-- Verify engine scaling calculations
-- Resume **Phase 2.1: Heightmap Import** from TODO.md
+- ✅ ~~Phase 2.1: Heightmap Import~~ → COMPLETE!
+- **Phase 2.2: Heightmap Export** → Export RAW/PNG heightmaps
+- **Phase 3.2.5: Modal Mouse Wheel System** → Advanced paint controls (R/S/F/L/H modes)
 
 **Future Enhancements:**
 - Project Save/Load system
-- More starting templates (Hills, Mountains, Coastal)
+- More starting templates (Hills, Mountains, Coastal presets)
 - Sculpt/Ramp/Smooth mode implementations
 - Advanced brush shapes (square, custom)
 - Texture painting (future)

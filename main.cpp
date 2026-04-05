@@ -9,6 +9,7 @@
 #include "DataDumper.h"
 #include "Framebuffer.h"
 #include "EngineScalingHelper.h"
+#include "ImageImporter.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -522,7 +523,36 @@ int main() {
                     params.showNewProjectDialog = true;
                 }
                 if (ImGui::MenuItem("Import Heightmap...", "Ctrl+O")) {
-                    // TODO: Phase 2.1 - Heightmap Import
+                    // Phase 2.1 - Heightmap Import
+                    ImportResult importResult = ImageImporter::importWithDialog(params.mapResolution);
+
+                    if (importResult.success) {
+                        // Check if resolution matches current setting
+                        if (importResult.width != static_cast<size_t>(params.mapResolution)) {
+                            // Resample to match current resolution
+                            rawHeight = resampleImage(importResult.heightmap, params.mapResolution, params.mapResolution);
+                        } else {
+                            rawHeight = std::move(importResult.heightmap);
+                        }
+
+                        // Clear undo/redo stacks (fresh start)
+                        undoStack.clear();
+                        redoStack.clear();
+
+                        // Regenerate all analysis layers
+                        design = LandscapeDesigner::designLandscape(rawHeight, params);
+
+                        // Update renderers
+                        renderer.uploadTexture(design.height);
+                        if (params.view3D) {
+                            renderer.updateTerrainMesh(design.height, params.heightScale);
+                        }
+
+                        std::cout << "Imported heightmap: " << importResult.width << "x" << importResult.height 
+                                  << " (min: " << importResult.minValue << ", max: " << importResult.maxValue << ")\n";
+                    } else if (!importResult.errorMessage.empty()) {
+                        std::cerr << "Import failed: " << importResult.errorMessage << "\n";
+                    }
                 }
                 if (ImGui::MenuItem("Export Heightmap...", "Ctrl+S")) {
                     // TODO: Export functionality

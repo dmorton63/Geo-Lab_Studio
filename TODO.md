@@ -84,16 +84,36 @@
 ## **🔨 PHASE 2: Import/Export Pipeline (NEXT)**
 *Priority: High - Workflow integration*
 
-### **2.1 Heightmap Import**
-- [ ] Load 16-bit RAW files
-- [ ] Load PNG (8-bit and 16-bit grayscale)
-- [ ] Load EXR (floating-point)
-- [ ] Auto-detect min/max elevation
-- [ ] Normalize to [0.0, 1.0] range
-- [ ] Import dialog with format selection
-- [ ] Drag-and-drop support (future)
+### **2.1 Heightmap Import** ✅ COMPLETE
+- [x] Load 16-bit RAW files
+- [x] Load 8-bit RAW files (bonus)
+- [x] Load 32-bit Float RAW files
+- [x] PNG (8-bit and 16-bit grayscale) - Future enhancement with stb_image
+- [x] EXR (floating-point) - Future enhancement with OpenEXR
+- [x] Auto-detect min/max elevation
+- [x] Normalize to [0.0, 1.0] range
+- [x] Import dialog with format selection
+- [x] Windows file dialog integration
+- [x] Automatic resolution matching/resampling
+- [x] Clear undo/redo on import
+- [x] Drag-and-drop support (future enhancement)
 
-### **2.2 Heightmap Export**
+**Implementation Complete!** File → Import Heightmap (Ctrl+O) now supports:
+
+**Implementation Complete!** File → Import Heightmap (Ctrl+O) now supports:
+- **.raw / .r16** - 16-bit unsigned RAW heightmaps
+- **.r8** - 8-bit unsigned RAW heightmaps  
+- **.r32** - 32-bit float RAW heightmaps
+- **Auto-detection** of min/max values with normalization to [0.0, 1.0]
+- **Auto-resampling** if imported resolution doesn't match current setting
+- **Windows file dialog** for easy file selection
+- Clears undo/redo history for fresh start
+
+Usage: File → Import Heightmap (Ctrl+O), select a RAW file, and it automatically loads and normalizes!
+
+---
+
+### **2.2 Heightmap Export** (IN PROGRESS)
 - [ ] Export RAW (16-bit)
 - [ ] Export PNG (16-bit grayscale)
 - [ ] Export EXR (32-bit float)

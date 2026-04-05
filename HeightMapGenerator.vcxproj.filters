@@ -98,6 +98,12 @@
     <ClInclude Include="Framebuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ImageImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="SETUP.md" />
@@ -146,5 +152,10 @@
     <None Include="V076_MENU_SYSTEM_IMPLEMENTATION.md" />
     <None Include="V076_UPDATE_NOTES.md" />
     <None Include="COMPLETE_FEATURE_SUMMARY.md" />
+    <None Include="ADVANCED_MOUSE_CONTROLS_SPEC.md" />
+    <None Include="TODO_UPDATE_MOUSE_CONTROLS.md" />
+    <None Include="MODAL_MOUSE_WHEEL_SYSTEM_SPEC.md" />
+    <None Include="DESIGN_EVOLUTION_MOUSE_CONTROLS.md" />
+    <None Include="MODAL_WHEEL_QUICK_REF.md" />
   </ItemGroup>
 </Project>

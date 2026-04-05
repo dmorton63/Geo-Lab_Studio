@@ -148,12 +148,14 @@
     <ClInclude Include="ErosionSimulator.h" />
     <ClInclude Include="Framebuffer.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="ImageImporter.h" />
     <ClInclude Include="LandscapeDesign.h" />
     <ClInclude Include="LandscapeDesigner.h" />
     <ClInclude Include="LandscapeParameters.h" />
     <ClInclude Include="PerlinNoise.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ImageExporter.h" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="TerrainMesh.h" />
     <ClInclude Include="UIPanel.h" />
   </ItemGroup>
@@ -163,8 +165,10 @@
     <None Include="3D_VISUALIZATION_GUIDE.md" />
     <None Include="3_PANEL_LAYOUT_IMPLEMENTATION.md" />
     <None Include="3_PANEL_VISUAL_GUIDE.md" />
+    <None Include="ADVANCED_MOUSE_CONTROLS_SPEC.md" />
     <None Include="CHECKLIST.md" />
     <None Include="COMPLETE_FEATURE_SUMMARY.md" />
+    <None Include="DESIGN_EVOLUTION_MOUSE_CONTROLS.md" />
     <None Include="DOCKING_IMPLEMENTATION_GUIDE.md" />
     <None Include="DUAL_VIEWPORT_IMPLEMENTATION.md" />
     <None Include="DUAL_VIEWPORT_QUICK_START.md" />
@@ -172,6 +176,8 @@
     <None Include="ENGINE_AWARE_GUIDE.md" />
     <None Include="ENGINE_AWARE_VISUAL_REFERENCE.md" />
     <None Include="EROSION_GUIDE.md" />
+    <None Include="MODAL_MOUSE_WHEEL_SYSTEM_SPEC.md" />
+    <None Include="MODAL_WHEEL_QUICK_REF.md" />
     <None Include="MOUSE_INPUT_FIX.md" />
     <None Include="NEW_FEATURES.md" />
     <None Include="NORMALIZE_FEATURE_COMPLETE.md" />
@@ -196,6 +202,7 @@
     <None Include="setup.ps1" />
     <None Include="TODAY_ACHIEVEMENT_SUMMARY.md" />
     <None Include="TODO.md" />
+    <None Include="TODO_UPDATE_MOUSE_CONTROLS.md" />
     <None Include="UPGRADE_SUMMARY.md" />
     <None Include="V075_RELEASE_SUMMARY.md" />
     <None Include="V076_MENU_SYSTEM_IMPLEMENTATION.md" />
