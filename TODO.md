@@ -113,11 +113,27 @@ Usage: File → Import Heightmap (Ctrl+O), select a RAW file, and it automatical
 
 ---
 
-### **2.2 Heightmap Export** (IN PROGRESS)
-- [ ] Export RAW (16-bit)
-- [ ] Export PNG (16-bit grayscale)
-- [ ] Export EXR (32-bit float)
-- [ ] Preserve full precision range
+### **2.2 Heightmap Export** ✅ COMPLETE
+- [x] Export RAW (16-bit)
+- [x] Export RAW (8-bit)
+- [x] Export RAW (32-bit float)
+- [x] Export PNG (8-bit grayscale)
+- [x] Windows file save dialog
+- [x] Format auto-detection from extension
+- [x] Preserve full precision range
+- [ ] Export PNG (16-bit grayscale) - Future enhancement
+- [ ] Export EXR (32-bit float) - Future enhancement
+
+**Implementation Complete!** File → Export Heightmap (Ctrl+S) now supports:
+- **.raw / .r16** - 16-bit unsigned RAW (industry standard)
+- **.r8** - 8-bit unsigned RAW (smaller files)
+- **.r32** - 32-bit float RAW (full precision)
+- **.png** - 8-bit PNG grayscale (compatible with most tools)
+- **Windows file dialog** for easy save location selection
+- **Auto-detection** of format from file extension
+- **Overwrite protection** (Windows dialog warns before overwriting)
+
+Usage: File → Export Heightmap (Ctrl+S), choose format and location, done!
 - [ ] Export dialog with format selection
 
 ### **2.3 Metadata Export**

@@ -157,5 +157,6 @@
     <None Include="MODAL_MOUSE_WHEEL_SYSTEM_SPEC.md" />
     <None Include="DESIGN_EVOLUTION_MOUSE_CONTROLS.md" />
     <None Include="MODAL_WHEEL_QUICK_REF.md" />
+    <None Include="PHASE_2_1_IMPORT_COMPLETE.md" />
   </ItemGroup>
 </Project>

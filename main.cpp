@@ -10,6 +10,7 @@
 #include "Framebuffer.h"
 #include "EngineScalingHelper.h"
 #include "ImageImporter.h"
+#include "ImageExporter.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -555,7 +556,14 @@ int main() {
                     }
                 }
                 if (ImGui::MenuItem("Export Heightmap...", "Ctrl+S")) {
-                    // TODO: Export functionality
+                    // Phase 2.2 - Heightmap Export
+                    HeightmapExportResult exportResult = ImageExporter::exportHeightmapWithDialog(design.height, ExportFormat::RAW_16BIT);
+
+                    if (exportResult.success) {
+                        std::cout << "Exported heightmap: " << exportResult.filePath << "\n";
+                    } else if (!exportResult.errorMessage.empty()) {
+                        std::cerr << "Export failed: " << exportResult.errorMessage << "\n";
+                    }
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit", "Alt+F4")) {

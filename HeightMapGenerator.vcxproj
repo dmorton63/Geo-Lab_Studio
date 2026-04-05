@@ -189,6 +189,7 @@
     <None Include="PAINT_MODE_SUMMARY.md" />
     <None Include="PATH_CONFIG.md" />
     <None Include="PHASE_1_1_COMPLETE.md" />
+    <None Include="PHASE_2_1_IMPORT_COMPLETE.md" />
     <None Include="PROJECT_COMPLETE.md" />
     <None Include="PROJECT_STRUCTURE.md" />
     <None Include="QUICK_REFERENCE.md" />

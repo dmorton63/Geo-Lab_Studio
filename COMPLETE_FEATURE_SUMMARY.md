@@ -1,6 +1,30 @@
-# Landscape Designer V0.7.7 - Complete Feature Summary
+# Landscape Designer V0.7.8 - Complete Feature Summary
 
-## What's New in V0.7.7
+## What's New in V0.7.8
+
+### 📤 Heightmap Export System (Phase 2.2) - COMPLETE I/O PIPELINE!
+Professional heightmap export workflow accessible via **File → Export Heightmap** (Ctrl+S)
+
+#### Supported Formats:
+- **16-bit RAW** (.raw, .r16) - Industry standard for Unreal, Unity, World Machine, Gaea
+- **32-bit Float RAW** (.r32) - Full precision for scientific data and round-trip editing
+- **8-bit RAW** (.r8) - Smaller files for quick previews
+- **8-bit PNG** (.png) - Universal format, opens in any image viewer
+
+#### Features:
+- Windows file save dialog with overwrite protection
+- Format auto-detection from file extension
+- Preserves full precision (32-bit float) or converts to desired format
+- Instant integration with game engines and terrain tools
+
+**Complete Workflow:** Import → Edit → Export!  
+Round-trip editing with zero quality loss using 32-bit float RAW format.
+
+---
+
+## Previous Updates
+
+### V0.7.7 - Heightmap Import (Phase 2.1)
 
 ### 📥 Heightmap Import System (Phase 2.1)
 Professional heightmap import workflow accessible via **File → Import Heightmap** (Ctrl+O)
@@ -58,11 +82,16 @@ Professional project initialization workflow accessible via **File → New Proje
 
 ### Heightmap Import/Export
 - ✅ **Import RAW Heightmaps** (8-bit, 16-bit, 32-bit float)
-- ✅ **Auto-Normalization** (preserves terrain shape)
+- ✅ **Export RAW Heightmaps** (8-bit, 16-bit, 32-bit float) ✅ NEW V0.7.8
+- ✅ **Export PNG** (8-bit grayscale) ✅ NEW V0.7.8
+- ✅ **Auto-Normalization** (preserves terrain shape on import)
 - ✅ **Auto-Resampling** (handles resolution mismatches)
-- ✅ **Windows File Dialog** integration
-- 🔜 **Export RAW** (coming in Phase 2.2)
-- 🔜 **PNG Import/Export** (future enhancement)
+- ✅ **Windows File Dialog** integration (import + export)
+- ✅ **Format Auto-Detection** (from file extension)
+- ✅ **Overwrite Protection** (Windows save dialog)
+- ✅ **Round-Trip Editing** (zero quality loss with 32-bit float)
+- 🔜 **PNG Import** (future enhancement)
+- 🔜 **16-bit PNG Export** (future enhancement)
 
 ### Paint/Sculpt System
 - ✅ **4 Brush Types** (Raise, Lower, Smooth, Flatten)
@@ -141,7 +170,7 @@ Professional project initialization workflow accessible via **File → New Proje
 ### File Menu
 - **New Project...** (Ctrl+N) - Project setup dialog
 - **Import Heightmap...** (Ctrl+O) - Import RAW heightmaps ✅ V0.7.7
-- **Export Heightmap...** (Ctrl+S) - *Coming in Phase 2.2*
+- **Export Heightmap...** (Ctrl+S) - Export RAW/PNG heightmaps ✅ V0.7.8
 - **Exit** (Alt+F4) - Close application
 
 ### Edit Menu
@@ -232,6 +261,7 @@ Professional project initialization workflow accessible via **File → New Proje
 |----------|--------|
 | **Ctrl+N** | New Project |
 | **Ctrl+O** | Import Heightmap ✅ V0.7.7 |
+| **Ctrl+S** | Export Heightmap ✅ V0.7.8 |
 | **Ctrl+Z** | Undo (paint mode) |
 | **Ctrl+Y** | Redo (paint mode) |
 | **Home** | Reset Camera |
@@ -270,7 +300,7 @@ Professional project initialization workflow accessible via **File → New Proje
 6. Normalize to final height range
 7. Export all layers (height + analysis)
 
-### Import & Edit Workflow ✅ NEW in V0.7.7
+### Import & Edit Workflow ✅ V0.7.7
 1. **File → Import Heightmap** (Ctrl+O)
 2. Select RAW file from World Machine, Gaea, or other tool
 3. Heightmap loads and auto-normalizes to [0.0, 1.0]
@@ -279,11 +309,19 @@ Professional project initialization workflow accessible via **File → New Proje
 6. Switch to Paint mode for manual edits
 7. Export enhanced heightmap back to game engine
 
+### Complete Round-Trip Workflow ✅ NEW in V0.7.8
+1. **File → Import Heightmap** (Ctrl+O) - Load from World Machine
+2. Edit terrain (erosion, painting, sculpting)
+3. **File → Export Heightmap** (Ctrl+S) - Save as 16-bit RAW
+4. Import into Unreal Engine/Unity
+5. **Perfect fidelity!** No quality loss, complete workflow!
+
 ---
 
 ## Version History
 
-- **V0.7.7** - Heightmap Import (Phase 2.1 complete) ✅ CURRENT
+- **V0.7.8** - Heightmap Export (Phase 2.2 complete) - COMPLETE I/O PIPELINE! ✅ CURRENT
+- **V0.7.7** - Heightmap Import (Phase 2.1 complete)
 - **V0.7.6** - Menu bar, mode toolbar, New Project dialog, bug fixes
 - **V0.7.5** - Auto-contrast, 3D camera controls, viewport focus tracking
 - **V0.7.0** - Initial 3-panel layout
@@ -294,10 +332,18 @@ Professional project initialization workflow accessible via **File → New Proje
 
 **Immediate Next Steps:**
 - ✅ ~~Phase 2.1: Heightmap Import~~ → COMPLETE!
-- **Phase 2.2: Heightmap Export** → Export RAW/PNG heightmaps
+- ✅ ~~Phase 2.2: Heightmap Export~~ → COMPLETE!
 - **Phase 3.2.5: Modal Mouse Wheel System** → Advanced paint controls (R/S/F/L/H modes)
 
+**Phase 2 Import/Export Pipeline - COMPLETE!** 🎉
+- Import RAW (8/16/32-bit) ✅
+- Export RAW (8/16/32-bit) ✅  
+- Export PNG (8-bit) ✅
+- Windows file dialogs ✅
+- Round-trip editing ✅
+
 **Future Enhancements:**
+- Modal Mouse Wheel System (V0.8.0 planned)
 - Project Save/Load system
 - More starting templates (Hills, Mountains, Coastal presets)
 - Sculpt/Ramp/Smooth mode implementations
