@@ -1,15 +1,53 @@
-# 🏔️ Landscape Designer V0.7.6
+# 🏔️ Landscape Designer V0.7.8
 
 A professional terrain generation and sculpting tool with real-time visualization, paint/sculpt capabilities, and game engine integration.
 
-![Landscape Designer](https://img.shields.io/badge/version-0.7.6-success.svg)
+![Landscape Designer](https://img.shields.io/badge/version-0.7.8-success.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-## 🎉 What's New in V0.7.6
+---
 
-### 🐛 Bug Fixes
+## ⚠️ Development Status
+
+**This project is actively under development.** While core features are functional and tested, some features may contain bugs or incomplete functionality. 
+
+**We welcome your feedback!** 🙌
+- Found a bug? [Open an issue](https://github.com/dmorton63/Geo-Lab_Studio/issues)
+- Have a feature suggestion? [Start a discussion](https://github.com/dmorton63/Geo-Lab_Studio/discussions)
+- Want to contribute? Pull requests are welcome!
+
+**Current Status:**
+- ✅ Core terrain generation - **Stable**
+- ✅ Paint/sculpt system - **Stable**
+- ✅ Import/Export pipeline - **Stable** (V0.7.7-0.7.8)
+- ✅ 3D visualization - **Stable**
+- ✅ Erosion simulation - **Stable**
+- 🚧 Modal mouse controls - **Planned** (V0.8.0)
+- 🚧 Project save/load - **Planned**
+
+See [TODO.md](TODO.md) for the complete roadmap.
+
+---
+
+## 🎉 What's New in V0.7.8
+
+### 📤 Complete I/O Pipeline!
+**Phase 2 (Import + Export) is now complete!**
+
+- ✅ **Import RAW Heightmaps** (Ctrl+O) - 8-bit, 16-bit, 32-bit float
+- ✅ **Export RAW Heightmaps** (Ctrl+S) - 8-bit, 16-bit, 32-bit float
+- ✅ **Export PNG** (8-bit grayscale)
+- ✅ **Round-trip editing** - Zero quality loss with 32-bit float format
+- ✅ **Windows file dialogs** - Professional import/export workflow
+
+**Complete Workflow:**  
+World Machine/Gaea → Import (Ctrl+O) → Edit → Export (Ctrl+S) → Unreal/Unity ✨
+
+### Previous Updates (V0.7.6-0.7.7)
+
+#### 🐛 Bug Fixes
 - **Tools panel no longer hides** - Fixed panel getting hidden behind viewports when clicking outside
 - **Paint mode display fixed** - Auto-contrast now enabled automatically, no more dark display
 
@@ -369,28 +407,48 @@ HeightMapGenerator/
 
 ## 🤝 Contributing
 
-Contributions welcome! We're especially interested in:
+**We welcome contributions!** This is an active project and we appreciate:
+- 🐛 **Bug Reports** - Found an issue? Let us know!
+- 💡 **Feature Suggestions** - Have an idea? Share it!
+- 📝 **Documentation** - Improve guides, add examples
+- 💻 **Code Contributions** - Fix bugs, add features
 
-### High Priority
+### High Priority Areas
 - Additional starting templates (Hills, Mountains, Coastal presets)
 - Texture painting system
 - Advanced brush shapes (square, custom)
 - More erosion algorithms
+- Mac/Linux ports
 
 ### Medium Priority
-- Mac/Linux ports
 - Additional game engine presets
 - Performance optimizations
 - UI themes
+- Export format extensions (TIFF, EXR)
 
 ### How to Contribute
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
+3. **Make** your changes (follow existing code style)
+4. **Test** thoroughly (ensure 0 errors, 0 warnings)
+5. **Document** your changes (update README/TODO as needed)
+6. **Commit** with descriptive messages (`git commit -m 'Add AmazingFeature'`)
+7. **Push** to your branch (`git push origin feature/AmazingFeature`)
+8. **Submit** a pull request
 
-Please follow the existing code style and document new features.
+### Code Style Guidelines
+- Follow existing C++ code style
+- Use meaningful variable names
+- Comment complex algorithms
+- Keep functions focused (single responsibility)
+- Test on Windows 10/11 with Visual Studio 2022
+
+### Questions?
+- Open an [issue](https://github.com/dmorton63/Geo-Lab_Studio/issues) for bugs
+- Start a [discussion](https://github.com/dmorton63/Geo-Lab_Studio/discussions) for ideas
+- Check [TODO.md](TODO.md) for current roadmap
+
+**All contributions are appreciated!** 🙏
 
 ---
 
@@ -410,11 +468,15 @@ See [LICENSE](LICENSE) for full details.
 - **stb_image_write** by Sean Barrett - Simple image export
 - Inspired by procedural generation pioneers and professional terrain tools (World Machine, Gaea, Houdini)
 
+**Special thanks to all contributors and testers!**
+
 ---
 
 ## 📊 Version History
 
-- **V0.7.6** (Current) - Menu bar, mode toolbar, New Project dialog, bug fixes
+- **V0.7.8** (Current) - Heightmap Export, Complete I/O Pipeline!
+- **V0.7.7** - Heightmap Import
+- **V0.7.6** - Menu bar, mode toolbar, New Project dialog, bug fixes
 - **V0.7.5** - Auto-contrast, 3D camera controls, viewport focus tracking
 - **V0.7.0** - Initial 3-panel layout
 - **V0.6.x** - Erosion simulation system
@@ -430,4 +492,5 @@ See [COMPLETE_FEATURE_SUMMARY.md](COMPLETE_FEATURE_SUMMARY.md) for detailed vers
 **Made with ❤️ for terrain enthusiasts and game developers**
 
 **Build Date:** 2024  
-**Status:** Active Development
+**Status:** 🚀 Active Development  
+**Current Focus:** Modal Mouse Wheel System (V0.8.0)
