@@ -134,7 +134,6 @@ Usage: File → Import Heightmap (Ctrl+O), select a RAW file, and it automatical
 - **Overwrite protection** (Windows dialog warns before overwriting)
 
 Usage: File → Export Heightmap (Ctrl+S), choose format and location, done!
-- [ ] Export dialog with format selection
 
 ### **2.3 Metadata Export**
 - [ ] Export slope map
@@ -142,6 +141,293 @@ Usage: File → Export Heightmap (Ctrl+S), choose format and location, done!
 - [ ] Export biome mask
 - [ ] Export water mask
 - [ ] Bundle as multi-channel texture (optional)
+
+---
+
+### **2.4 Realistic Engine-Specific Templates** 🎯 NEW!
+*Priority: High - Professional starter content*
+
+**Concept:** Pre-configured, realistic terrain templates optimized for each game engine and terrain type. Users get professional-quality starting points instead of generic Perlin noise or flat planes.
+
+**Template Categories:**
+
+#### **Hills Templates**
+- [ ] **Unreal Hills** - Rolling hills perfect for UE5 landscapes
+  - Height range: 0-20m (character-proportioned)
+  - Perlin FBM preset: 4 octaves, 0.5 persistence, gentle slopes
+  - Pre-applied light thermal erosion
+  - Optimized for 2km world size
+- [ ] **Unity Hills** - Gentle terrain for Unity Terrain system
+  - Height range: 0-15m
+  - Smooth noise, minimal peaks
+  - Good for Unity's terrain painting workflows
+- [ ] **Godot Hills** - Open-world friendly rolling terrain
+  - Height range: 0-18m
+  - Balanced detail vs performance
+
+#### **Mountain Templates**
+- [ ] **Unreal Mountains** - Dramatic peaks and valleys
+  - Height range: 0-150m (scaled for characters)
+  - Ridged noise for sharp peaks
+  - Pre-applied hydraulic erosion (water channels)
+  - Thermal erosion (rock slides on steep slopes)
+- [ ] **Unity Mountains** - High-detail alpine terrain
+  - Height range: 0-120m
+  - Multiple noise octaves for realistic detail
+- [ ] **Godot Mountains** - Performance-optimized peaks
+  - Height range: 0-100m
+  - Lower detail for better performance
+
+#### **Coastal Templates**
+- [ ] **Unreal Coastal** - Beach + cliffs + ocean floor
+  - Height range: -20m to +30m (underwater + land)
+  - Gentle slopes near water, steep cliffs
+  - Pre-masked water areas
+- [ ] **Unity Coastal** - Island shoreline
+  - Height range: -15m to +25m
+  - Sandy beaches with gradual slopes
+- [ ] **Godot Coastal** - Small island terrain
+  - Height range: -10m to +20m
+
+#### **Plains Templates**
+- [ ] **Unreal Plains** - Vast open grasslands
+  - Height range: 0-5m (subtle variation)
+  - Very gentle slopes
+  - Good for large open-world games
+- [ ] **Unity Plains** - Farmland/prairie terrain
+  - Height range: 0-3m
+  - Minimal elevation change
+- [ ] **Godot Plains** - Flat terrain with micro-details
+  - Height range: 0-4m
+
+#### **Desert Templates**
+- [ ] **Unreal Desert** - Sand dunes and rock formations
+  - Height range: 0-40m
+  - Billowy noise for dunes
+  - Smooth erosion (wind-swept appearance)
+- [ ] **Unity Desert** - Rolling dunes
+  - Height range: 0-30m
+- [ ] **Godot Desert** - Simple dune terrain
+  - Height range: 0-25m
+
+#### **Volcanic Templates**
+- [ ] **Unreal Volcanic** - Caldera and lava flows
+  - Height range: 0-200m
+  - Sharp ridged peaks
+  - Flat crater floors
+- [ ] **Unity Volcanic** - Mountain with crater
+  - Height range: 0-150m
+- [ ] **Godot Volcanic** - Simple volcanic cone
+  - Height range: 0-120m
+
+**Implementation Plan:**
+
+**Phase 2.4.1 - Template System Foundation**
+- [ ] Extend `StartingTemplate` enum with new template types
+- [ ] Create `TemplateGenerator` class
+- [ ] Template metadata structure:
+  - Engine type
+  - Terrain category (Hills/Mountains/Coastal/etc.)
+  - Noise parameters
+  - Erosion settings
+  - Height range
+  - World size recommendation
+  - Description/preview
+- [ ] Template preview thumbnails (future)
+
+**Phase 2.4.2 - Template Generation Functions**
+- [ ] `generateHillsTemplate(TargetEngine engine)` - Realistic rolling hills
+- [ ] `generateMountainsTemplate(TargetEngine engine)` - Dramatic peaks
+- [ ] `generateCoastalTemplate(TargetEngine engine)` - Beach + cliffs
+- [ ] `generatePlainsTemplate(TargetEngine engine)` - Flat with subtle variation
+- [ ] `generateDesertTemplate(TargetEngine engine)` - Sand dunes
+- [ ] `generateVolcanicTemplate(TargetEngine engine)` - Volcanic landscape
+
+**Phase 2.4.3 - UI Integration**
+- [ ] Update New Project dialog with template categories
+- [ ] Template dropdown grouped by type:
+  - Procedural (Perlin Noise, Flat)
+  - Hills (Unreal Hills, Unity Hills, Godot Hills)
+  - Mountains (Unreal Mountains, Unity Mountains, etc.)
+  - Coastal, Plains, Desert, Volcanic...
+- [ ] Template description tooltip
+- [ ] "Use Recommended Settings" checkbox (auto-sets resolution, world size)
+
+**Phase 2.4.4 - Advanced Template Features**
+- [ ] Template save/load system
+- [ ] User-created templates
+- [ ] Template marketplace integration (future)
+- [ ] Template preview images
+
+**Benefits:**
+- ✅ Professional starting points (no more "generate random noise and hope")
+- ✅ Engine-optimized (heights perfect for each engine's scale)
+- ✅ Time-saving (instant realistic terrain)
+- ✅ Educational (users can study parameters of good terrain)
+- ✅ Consistent quality (every project starts on solid foundation)
+
+**Example Workflow:**
+1. File → New Project
+2. Select "Unreal Engine"
+3. Choose "Mountains Template"
+4. Gets realistic UE5-scaled mountain terrain instantly!
+5. Paint roads, add details, export
+6. Perfect fidelity in Unreal Engine
+
+---
+
+### **2.5 NOAA DEM Import** 🌍 NEW!
+*Priority: Medium-High - Real-world terrain data*
+
+**Concept:** Import real-world elevation data from NOAA (National Oceanic and Atmospheric Administration) and other geographic data sources. Enables creating game levels based on actual locations (Grand Canyon, Mount Everest, your hometown, etc.).
+
+**Data Sources:**
+- **NOAA DEM** - Digital Elevation Models (USA coverage)
+- **USGS 3DEP** - 3D Elevation Program (high-resolution USA)
+- **SRTM** - Shuttle Radar Topography Mission (global coverage)
+- **ASTER GDEM** - Advanced Spaceborne Thermal Emission (global)
+- **NASA SRTM** - 30m resolution global elevation
+- **OpenTopography** - Research-grade topographic data
+
+**Supported Formats:**
+
+#### **GeoTIFF (Primary)**
+- [ ] Load GeoTIFF files (common DEM format)
+- [ ] Extract elevation band
+- [ ] Handle georeferencing metadata
+- [ ] Support 16-bit/32-bit elevation data
+- [ ] Auto-detect coordinate system (UTM, WGS84, etc.)
+
+#### **ASCII Grid (ESRI Format)**
+- [ ] Load .asc files (simple text format)
+- [ ] Parse header (ncols, nrows, cellsize, NODATA)
+- [ ] Convert to internal heightmap format
+
+#### **USGS DEM (.dem)**
+- [ ] Load USGS DEM format
+- [ ] Parse header records
+- [ ] Handle multiple elevation profiles
+
+#### **HGT (SRTM Format)**
+- [ ] Load .hgt files (Shuttle Radar Topography Mission)
+- [ ] 1-arc-second and 3-arc-second resolution
+- [ ] Big-endian 16-bit signed integers
+
+**Implementation Plan:**
+
+**Phase 2.5.1 - GeoTIFF Support (LibTIFF Integration)**
+- [ ] Integrate LibTIFF library
+- [ ] Load GeoTIFF files
+- [ ] Extract elevation data
+- [ ] Handle coordinate transformations
+- [ ] Auto-detect min/max elevation
+- [ ] Normalize to [0.0, 1.0] range
+
+**Phase 2.5.2 - ASCII Grid Support**
+- [ ] Parse .asc header
+- [ ] Load elevation grid
+- [ ] Handle NODATA values (set to 0 or interpolate)
+- [ ] Convert to Image format
+
+**Phase 2.5.3 - Geographic Metadata Handling**
+- [ ] Store original coordinate system
+- [ ] Store bounding box (lat/lon)
+- [ ] Store elevation units (meters, feet)
+- [ ] Display location info in UI
+- [ ] Export metadata with processed terrain
+
+**Phase 2.5.4 - DEM Import Dialog**
+- [ ] File → Import DEM Data (Ctrl+Shift+O)
+- [ ] File browser filtered to DEM formats
+- [ ] Import options:
+  - Crop to region of interest
+  - Downsample to target resolution
+  - Preserve aspect ratio
+  - Auto-normalize elevation
+  - Set sea level
+  - Clamp extreme elevations
+- [ ] Preview window showing:
+  - Geographic extent (lat/lon)
+  - Original resolution
+  - Elevation range (meters)
+  - Estimated terrain size
+- [ ] "Import" button
+
+**Phase 2.5.5 - Real-World Scale Integration**
+- [ ] Calculate real-world dimensions (km)
+- [ ] Suggest appropriate engine world size
+- [ ] Auto-set height ranges based on actual elevation
+- [ ] Display location name (if available)
+- [ ] Show distance scale overlay
+
+**Phase 2.5.6 - Advanced DEM Features**
+- [ ] Multi-tile DEM loading (stitch adjacent tiles)
+- [ ] Elevation band selection (multi-band GeoTIFFs)
+- [ ] Void filling (interpolate missing data)
+- [ ] Edge blending (smooth tile boundaries)
+- [ ] Online DEM download (NOAA/USGS APIs) - future
+- [ ] Location search ("Grand Canyon, AZ") - future
+
+**Benefits:**
+- ✅ Real-world terrain (create game levels of actual locations!)
+- ✅ Accurate elevation data (NOAA/USGS precision)
+- ✅ Educational (study real geomorphology)
+- ✅ Unique levels (no generic terrain, every location is unique)
+- ✅ Time-saving (skip manual sculpting, start with reality)
+
+**Example Workflows:**
+
+**Workflow 1: Import Grand Canyon**
+1. Download Grand Canyon DEM from USGS
+2. File → Import DEM Data
+3. Select GeoTIFF file
+4. Crop to desired region
+5. Downsample to 1024x1024
+6. Auto-normalize elevation
+7. Apply light erosion for game-ready detail
+8. Export to Unreal Engine
+9. Perfect Grand Canyon level!
+
+**Workflow 2: Create Hometown Game Level**
+1. Download local DEM from NOAA
+2. Import with street-level detail
+3. Paint buildings/roads on top
+4. Add game-specific features
+5. Export for Unity
+6. Recognizable hometown in your game!
+
+**Workflow 3: Mountain Climbing Game**
+1. Import Mount Everest SRTM data
+2. Set base camp at correct elevation
+3. Paint climbing routes
+4. Add safety features
+5. Export with proper scale
+6. Realistic mountaineering simulation!
+
+**Technical Challenges:**
+- Large file sizes (GeoTIFF can be GB-scale)
+- Memory management for huge DEMs
+- Coordinate system transformations
+- Void/NODATA handling
+- Performance with high-resolution data
+
+**Libraries Needed:**
+- **LibTIFF** or **GDAL** - GeoTIFF reading
+- **PROJ** - Coordinate transformations (optional)
+- **LibGeoTIFF** - Geospatial metadata
+
+**File Size Examples:**
+- 1° x 1° SRTM tile (30m): ~25MB
+- USGS 1/3 arc-second (10m): ~100MB
+- High-res LiDAR data (1m): Several GB
+
+**Future Enhancements:**
+- [ ] Online DEM browser (select region on map)
+- [ ] Automatic tile stitching
+- [ ] Multi-resolution (LOD) import
+- [ ] Bathymetry data (ocean floor depths)
+- [ ] Vegetation data integration
+- [ ] Land cover classification import
 
 ---
 
