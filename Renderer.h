@@ -20,6 +20,11 @@ public:
 
     void updateTerrainMesh(const Image& heightmap, float heightScale = 1.0f);
 
+    // Set the target data range for consistent 3D height scaling (used after normalization)
+    void setTargetDataRange(float minVal, float maxVal) {
+        targetDataRange = maxVal - minVal;
+    }
+
     GLuint getTextureID() const { return textureID; }
 
 private:
@@ -34,6 +39,10 @@ private:
     // Display range for auto-contrast
     float displayMin = 0.0f;
     float displayMax = 1.0f;
+
+    // Target data range for 3D height scaling (preserved from engine presets)
+    // This prevents 3D height from changing when painting within the normalized range
+    float targetDataRange = 1.0f;  // Default to full range, updated when normalized terrain is uploaded
 
     GLuint compileShader(const char* source, GLenum type);
     GLuint createShaderProgram2D();

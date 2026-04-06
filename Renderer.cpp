@@ -366,14 +366,14 @@ void Renderer::render3D(int windowWidth, int windowHeight, const Camera& camera,
 
 void Renderer::updateTerrainMesh(const Image& heightmap, float heightScale) {
     // Auto-boost height scale for narrow ranges (like engine presets)
-    // If the data range is less than 0.5, scale it up proportionally
-    float dataRange = displayMax - displayMin;
+    // Use targetDataRange instead of current displayMax-displayMin to maintain consistent 3D height
+    // This prevents the 3D view from changing height when painting within the normalized range
     float effectiveHeightScale = heightScale;
 
-    if (dataRange < 0.5f && dataRange > 0.001f) {
+    if (targetDataRange < 0.5f && targetDataRange > 0.001f) {
         // Boost the height scale to compensate for narrow data range
         // Target effective range of 0.5 (reasonable 3D height)
-        effectiveHeightScale = heightScale * (0.5f / dataRange);
+        effectiveHeightScale = heightScale * (0.5f / targetDataRange);
 
         // Cap the boost to avoid extreme values
         effectiveHeightScale = std::min(effectiveHeightScale, heightScale * 5.0f);

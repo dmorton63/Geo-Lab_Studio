@@ -389,6 +389,9 @@ int main() {
             // Normalize to target range
             rawHeight = LandscapeDesigner::normalizeToRange(rawHeight, params.minHeight, params.maxHeight);
 
+            // Set target data range for consistent 3D height scaling
+            renderer.setTargetDataRange(params.minHeight, params.maxHeight);
+
             // Update design and display
             design = LandscapeDesigner::designLandscape(rawHeight, params);
 
@@ -501,6 +504,8 @@ int main() {
                 design.waterMask = LandscapeDesigner::computeWaterMask(rawHeight, params.waterLevel);
                 design.biomeMask = LandscapeDesigner::computeBiomeMask(design.slope, design.waterMask, params.slopeThreshold);
 
+                // Always update 3D mesh when entering paint mode if 3D view is enabled
+                // (fixes issue where 3D view shows 2D fallback until normalize is performed)
                 if (params.view3D) {
                     renderer.updateTerrainMesh(design.height, params.heightScale);
                 }
@@ -536,6 +541,17 @@ int main() {
             }
 
             lastPreviewMode = params.previewMode;
+            lastView3D = params.view3D;
+        }
+
+        // Handle 3D view toggle WHILE IN PAINT MODE (separate from above since paint mode skips preview changes)
+        if (params.paintMode && params.view3D && !lastView3D && design.height.size() > 0) {
+            std::cout << "3D view enabled in paint mode - generating terrain mesh" << std::endl;
+            renderer.updateTerrainMesh(design.height, params.heightScale);
+            lastView3D = params.view3D;
+        }
+        // Track 3D view state when toggling OFF in paint mode
+        if (params.paintMode && !params.view3D && lastView3D) {
             lastView3D = params.view3D;
         }
 
@@ -1049,20 +1065,33 @@ int main() {
                 // Generate terrain based on template
                 switch (params.startingTemplate) {
                     case StartingTemplate::PerlinNoise:
-                        // Use existing Perlin generation (will happen automatically via needsUpdate)
-                        params.markChanged();
+                        // Generate Perlin noise terrain
+                        rawHeight = generateHeightmap(params);
                         break;
 
                     case StartingTemplate::FlatSculptable:
                         // Generate flat terrain at mid-height
                         rawHeight = generateFlatTerrain(params.mapResolution, 0.5f);
-                        design = LandscapeDesigner::designLandscape(rawHeight, params);
-                        renderer.uploadTexture(design.height);
-                        if (params.view3D) {
-                            renderer.updateTerrainMesh(design.height, params.heightScale);
-                        }
                         break;
                 }
+
+                // Normalize terrain to calculated height range (important for engine-specific scaling)
+                std::cout << "Normalizing new terrain to range [" << params.minHeight 
+                          << ", " << params.maxHeight << "]..." << std::endl;
+                rawHeight = LandscapeDesigner::normalizeToRange(rawHeight, params.minHeight, params.maxHeight);
+
+                // Set target data range for consistent 3D height scaling
+                renderer.setTargetDataRange(params.minHeight, params.maxHeight);
+
+                // Generate design layers
+                design = LandscapeDesigner::designLandscape(rawHeight, params);
+
+                // Upload to renderer
+                renderer.uploadTexture(design.height);
+
+                // Auto-enable 3D view for new projects (better UX - see your terrain immediately!)
+                params.view3D = true;
+                renderer.updateTerrainMesh(design.height, params.heightScale);
 
                 // Clear undo/redo stacks for fresh project
                 undoStack.clear();
@@ -1077,6 +1106,7 @@ int main() {
                 std::cout << "  Terrain Type: " << terrainTypes[static_cast<int>(params.terrainType)] << std::endl;
                 std::cout << "  Size: " << params.terrainWorldSize << "m" << std::endl;
                 std::cout << "  Height Range: " << params.minHeight << " - " << params.maxHeight << std::endl;
+                std::cout << "  3D View: Enabled" << std::endl;
 
                 params.showNewProjectDialog = false;
                 ImGui::CloseCurrentPopup();
